@@ -1,0 +1,2 @@
+avwong13@avwong13:~/Desktop/goprac$ export GOPATH=$HOME/go
+avwong13@avwong13:~/Desktop/goprac$ go get golang.org/x/net/html
