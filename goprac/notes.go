@@ -1182,10 +1182,303 @@ you can alsp make a map of a map:
     // ...parser...
   }
 
+  %6 methods
+  two key principles of oop: encapsulation and compositon
+
+  %6.1 Method Declarations
+
+  a method is declared with a variant of the ordinary function
+  declaration in which an extra parameter appears Before
+  the function name. the parameter attaches the function
+  to the type of that parameter
+
+  ex.
+  package geometry
+
+  import "math"
+
+  type Point struct{X, Y float64}
+
+  //traditional function
+  func Distance(p, q point) float64 {
+        return math.Hypot(q.X-p.X, q.Y-p.Y)
+  }
+
+  //same thing, but as a method of Point types
+  func (p point) Distance(q Point) float64 {
+    return math.Hypot(q.X-p.X, q.Y-p.Y)
+  }
 
 
+  p is called the reciever
+
+  in go we do not have a special name like
+  this or self for the reciever, we choose receiver
+  names just as we would for any other parameter.
+
+  ex.
+  p.Distance(q) is an example of a selecter
+
+  go does not support function overloading nor does it support
+  user-defined operators
+
+  you can also make methods for slices:
+
+  // A Path is a journey connecting the points with straight lines.
+  type Path []Point
+
+  // Distance returns the distance traveled along the path.
+  func (path Path) Distance() float64 {
+    sum := 0.0
+    for i := range path {
+      if i > 0 {
+        sum += path[i-1].Distance(path[i])
+        }
+      }
+      return sum
+  }
+
+  %6.2 methods with a Point reciever
+
+  basically using a pointer
 
 
+  func (p *Point) ScaleBy(factor float64) {
+    p.X *= factor
+    p.Y *= factor
+  }
+
+  //calling methods
+  (*Point).ScaleBy(8.3)
+
+  to avoid ambiguities, method declaration are not
+  permitted on named types that are themselves pointer types
+
+  type P *int
+  func(p) f() {//...//}
+
+  also you cannot take the address of literals
+
+  ex.
+  Point{1, 2}.ScaleBy(2) // compile error: can't take address of Point literal
+
+  %6.2.1 Nil is a Valid Reciever Value
+
+  ex.
+  // An IntList is a linked list of integers.
+  // A nil *IntList represents the empty list.
+  type IntList struct {
+    Value int
+    Tail *IntList
+  }
+  // Sum returns the sum of the list elements.
+  func (list *IntList) Sum() int {
+    if list == nil {
+      return 0
+    }
+    return list.Value + list.Tail.Sum()
+  }
+
+  %6.3 Composing Types by Struct embedding
+  ex.
+  import "image/color"
+  type Point struct{ X, Y float64 }
+  type ColoredPoint struct {
+    Point
+    Color color.RGBA
+  }
+
+  remember the syntatic shortcut in 4.4.3
+  we can do this even:
+
+  var cp ColoredPoint
+  cp.X = 1
+  fmt.Println(cp.Point.X) // "1"
+  cp.Point.Y = 2
+  fmt.Println(cp.Y) // "2"
+
+  and:
+
+  red := color.RGBA{255, 0, 0, 255}
+  blue := color.RGBA{0, 0, 255, 255}
+  var p = ColoredPoint{Point{1, 1}, red}
+  var q = ColoredPoint{Point{5, 4}, blue}
+  fmt.Println(p.Distance(q.Point)) // "5"
+  p.ScaleBy(2)
+  q.ScaleBy(2)
+  fmt.Println(p.Distance(q.Point)) // "10"
+
+  however we cant do this:
+
+  p.Distance(q) // compile error: cannot use q (ColoredPoint) as Point
+
+  even though ColoredPoint dont have those actual methods, it has a field
+  Point, so the compiler no to generate wrapper methods, equivalent to these:
+
+  func (p ColoredPoint) Distance(q Point) float64 {
+    return p.Point.Distance(q)
+  }
+  func (p *ColoredPoint) ScaleBy(factor float64) {
+    p.Point.ScaleBy(factor)
+  }
+
+  the type of an anonymous field may be a pointer to  a named type
+
+  ex.
+
+  type ColoredPoint struct {
+    *Point
+    Color color.RGBA
+  }
+
+  p := ColoredPoint{&Point{1, 1}, red}
+  q := ColoredPoint{&Point{5, 4}, blue}
+  fmt.Println(p.Distance(*q.Point)) // "5"
+  q.Point = p.Point // p and q now share the same Point
+  p.ScaleBy(2)
+  fmt.Println(*p.Point, *q.Point) // "{2 2} {2 2}"
+
+  how compiler disambiguate selectors like x.someMethod()
+  ex. p.ScaleBy
+  1) looks for a directly declared method
+  2) then for methods promoted once from ColorPoint's embedded fields
+  3) then for methods promoted twice from embedded fields within Point and &RGBA
+  4) and so on down the rabbit hole
+
+  methods can be declared only on named types like Point and *Point
+  but thanks to embedding, its possible and sometimes useful for unnamed struct
+  types to have methods too
+
+  ex: a simple cache:
+
+  var cache = struct {
+    sync.Mutex
+    mapping map[string]string
+  } {
+    mapping : male(male[string]string)
+  }
+
+  func Lookup(key string) string {
+    cache.Lock()
+    v := cache.mapping[key]
+    cache.Unlock()
+    return v
+  }
+
+  %6.4 Method Values and Expressions
+
+  p.Distance() is a method call
+  p.Distance is a method value
+
+  ex.
+  p := Point{1, 2}
+  q := Point{4, 6}
+  distanceFromP := p.Distance // method value
+  fmt.Println(distanceFromP(q)) // "5"
+  var origin Point // {0, 0}
+  fmt.Println(distanceFromP(origin)) // "2.23606797749979", ;5
+  scaleP := p.ScaleBy // method value
+  scaleP(2) // p becomes (2, 4)
+  scaleP(3) // then (6, 12)
+  scaleP(10) // then (60, 120)
+
+  we can use it in like a template design pattern:
+
+  type Point struct{ X, Y float64 }
+  func (p Point) Add(q Point) Point { return Point{p.X + q.X, p.Y + q.Y} }
+  func (p Point) Sub(q Point) Point { return Point{p.X - q.X, p.Y - q.Y} }
+  type Path []Point
+
+  func (path Path) TranslateBy(offset Point, add bool) {
+    var op func(p, q Point) Point
+    if add {
+      op = Point.Add
+      } else {
+        op = Point.Sub
+      }
+      for i := range path {
+      // Call either path[i].Add(offset) or path[i].Sub(offset).
+        path[i] = op(path[i], offset)
+        }
+  }
+
+
+  %6.5 Example: Bit Vector Type
+
+  a bit vector uses a slice of unsigned integer values, each bit of which
+  represents a possble element of the set.
+
+  // An IntSet is a set of small non-negative integers.
+  // Its zero value represents the empty set.
+  type IntSet struct {
+    words []uint64
+  }
+  // Has reports whether the set contains the non-negative value x.
+  func (s *IntSet) Has(x int) bool {
+    word, bit := x/64, uint(x%64)
+    return word < len(s.words) && s.words[word]&(1<<bit) != 0
+  }
+
+  // Add adds the non-negative value x to the set.
+  func (s *IntSet) Add(x int) {
+    word, bit := x/64, uint(x%64)
+    for word >= len(s.words) {
+      s.words = append(s.words, 0)
+    }
+    s.words[word] |= 1 << bit
+  }
+  // UnionWith sets s to the union of s and t.
+  func (s *IntSet) UnionWith(t *IntSet) {
+    for i, tword := range t.words {
+      if i < len(s.words) {
+        s.words[i] |= tword
+      } else {
+        s.words = append(s.words, tword)
+        }
+      }
+  }
+
+  // String returns the set as a string of the form "{1 2 3}".
+  func (s *IntSet) String() string {
+    var buf bytes.Buffer
+    buf.WriteByte('{')
+    for i, word := range s.words {
+      if word == 0 {
+      continue
+    }
+    for j := 0; j < 64; j++ {
+      if word&(1<<uint(j)) != 0 {
+        if buf.Len() > len("{") {
+          buf.WriteByte(' ')
+          }
+        fmt.Fprintf(&buf, "%d", 64*i+j)
+        }
+      }
+    }
+    buf.WriteByte('}')
+    return buf.String()
+  }
+
+  %6.6 encapsulation
+
+  aka information hiding
+
+  go has only one mechanism to control th visibility of names when exported:
+  capitalize identifiers are exported if undefined
+  uncapitalized names are not
+
+  That’s the reason the IntSet type from the previous section was declared as a
+  struct ty e even though it has only a single field:
+  type IntSet struct {
+  words []uint64
+  }
+
+  type Counter struct { n int }
+  func (c *Counter) N() int { return c.n }
+  func (c *Counter) Increment() { c.n++ }
+  func (c *Counter) Reset() { c.n = 0 }
+
+n is hidden since it is lowercase
 */
 
 package main
