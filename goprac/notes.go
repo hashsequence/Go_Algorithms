@@ -1251,6 +1251,12 @@ you can alsp make a map of a map:
   //calling methods
   (*Point).ScaleBy(8.3)
 
+  compiler inserts an implicit * operat ion for us. These two function calls are
+  equivalent:
+
+  pptr.Distance(q)
+  (*pptr).Distance(q)
+
   to avoid ambiguities, method declaration are not
   permitted on named types that are themselves pointer types
 
@@ -1479,6 +1485,518 @@ you can alsp make a map of a map:
   func (c *Counter) Reset() { c.n = 0 }
 
 n is hidden since it is lowercase
+
+note: the lowercase and uppercase only works package level
+
+%7 interfaces
+++++++++++++++++++++++++++++++++++++++++++++++
+%7.1 interfaces as contracts
+
+an interface is an abstract type. it doesnt expose the representation
+or internal structure of its values, or set basic operations they supports,
+it only reveals some of their methods
+ex:
+
+package fmt
+func Fprintf(w io.Writer, format string, args ...interface{}) (int, error)
+func Printf(format string, args ...interface{}) (int, error) {
+  return Fprintf(os.Stdout, format, args...)
+}
+func Sprintf(format string, args ...interface{}) string {
+var buf bytes.Buffer
+  Fprintf(&buf, format, args...)
+  return buf.String()
+}
+
+Printf and Sprintf are both wrappers of Fprintf and we can see that
+Printf and Sprintf pass in different arguments for w, but since it
+satisfies the contract we can do this.
+
+
+package io
+
+ex type Writer interface {
+// Write writes len(p) bytes from p to the underlying data stream.
+// It returns the number of bytes written from p (0 <= n <= len(p))
+// and any error encountered that caused the write to stop early.
+// Write must return a non-nil error if it returns n < len(p).
+// Write must not modify the slice data, even temporarily.
+//
+// Implementations must not retain p.
+  write (p []byte) (n int, err error)
+}
+
+
+//now we implement the interface
+
+type ByteCounter int
+
+func (c * ByteCounter) Write(p []byte) (int, error) {
+  *c += ByteCounter(len(p)) // convert int to ByteCounter
+  return len(p), nil
+}
+
+basically, the write method of the *ByteCounter type below
+satisfies the writer contract so when we can do this:
+
+var c ByteCounter
+c.Write([]byte("hello"))
+fmt.Println(c) // "5", = len("hello")
+
+if the concrete type satisfies:
+1) has the functions implemented, has correct signature and behavior
+2) is concrete
+
+%7.2 interface Types
+
+more examples of intefaces:
+package io
+type Reader interface {
+  Read(p []byte) (n int, err error)
+}
+type Closer interface {
+  Close() error
+}
+
+looking further we find declaration of new interface types as combinations
+of existing interfaces
+
+ex.
+
+type Reader interface {
+  Read(p []byte) (n int, err error)
+}
+type Closer interface {
+  Close() error
+}
+
+embedding an interface:
+
+type ReadWriteCloser interface {
+  Reader
+  Writer
+  Closer
+}
+
+type ReadWriter interface {
+  Reader
+  Writer
+}
+
+the structure above that resembls struct embedding, lets us name another
+interface as shorthand for writeing out all its method
+
+we could have done this for ReadWriter instead:
+
+type ReadWriter interface {
+  Read(p []byte) (n int, err error)
+  Write(p []byte) (n int, err error)
+}
+or even usingamixture of the two sty les:
+type ReadWriter interface {
+  Read(p []byte) (n int, err error)
+  Writer
+}
+
+basically its like extending multiple interfaces
+
+%7.3 interface satisfaction
+
+a type satisfies an interfcae if it possesses all the methods the
+interface requires
+
+for example the *os.Files satisfies io.Reader, Write, Closer, and ReadWriter
+
+empty interface:
+
+var any interface{}
+any = true
+any = 12.34
+any = "hello"
+any = map[string]int{"one": 1}
+any = new(bytes.Buffer)
+
+// *bytes.Buffer must satisfy io.Writer
+var w io.Writer = new(bytes.Buffer)
+
+// *bytes.Buffer must satisfy io.Writer
+var _ io.Writer = (*bytes.Buffer)(nil)
+
+non-empty interface types such as io.Writer are most often
+satisfied by a pointer type, particularly
+when one or more method of the interface methods implies some kind
+of mutation to the reciever as the write method does.
+
+%7.4 Parsing Flags with flag.Value
+
+in this section, we'll see how another standard interfac, flag.Value, help
+us define new notations for command line flags.
+
+Consider the program below:
+
+var period = flag.Duration("period", 1*time.Second, "sleep period")
+
+func main() {
+  flag.Parse()
+  fmt.Printf("Sleeping for %v...", *period)
+  time.Sleep(*period)
+  fmt.Println()
+}
+
+$ go build gopl.io/ch7/sleep
+$ ./sleep
+Sleeping for 1s..
+
+by default the sleep period is one second, but can be controlled through
+the -period command-line flag.
+
+$ ./sleep -period 50ms
+Sleeping for 50ms...
+$ ./sleep -period 2m30s
+Sleeping for 2m30s...
+$ ./sleep -period 1.5h
+Sleeping for 1h30m0s...
+$ ./sleep -period "1 day"
+invalid value "1 day" for flag -period: time: invalid duration 1 day
+
+this is the package flag
+
+package flag
+
+// Value is the interface to the value stored in a flag.
+type Value interface {
+  String() string
+  Set(string) error
+}
+
+the String method format's the flag's value, thus every flag.Value
+is also a fmt.Stringer. The set method parses its string argument and updates
+the flag value.
+
+example of using flag.value
+
+let us define the celsiusFlag type that allows a temperature to be
+specified in Celcius, or in Farenheit with appropriate conversion.
+notice that celciusFlag embeds a Celsius thereby getting a String method for
+free
+
+// *celsiusFlag satisfies the flag.Value interface.
+type celsiusFlag struct{ Celsius }
+
+func (f *celsiusFlag) Set(s string) error {
+  var unit string
+  var value float64
+  fmt.Sscanf(s, "%f%s", &value, &unit) // no error check needed
+  switch unit {
+    case "C", "°C":
+    f.Celsius = Celsius(value)
+    return nil
+  case "F", "°F":
+    f.Celsius = FToC(Fahrenheit(value))
+    return nil
+    }
+  return fmt.Errorf("invalid temperature %q", s)
+}
+
+
+// CelsiusFlag defines a Celsius flag with the specified name,
+// default value, and usage, and returns the address of the flag variable.
+// The flag argument must have a quantity and a unit, e.g., "100C".
+func CelsiusFlag(name string, value Celsius, usage string) *Celsius {
+  f := celsiusFlag{value}
+  flag.CommandLine.Var(&f, name, usage)
+  return &f.Celsius
+}
+
+var temp = tempconv.CelsiusFlag("temp", 20.0, "the temperature")
+func main() {
+  flag.Parse()
+  fmt.Println(*temp)
+}
+
+
+typical session:
+$ go build gopl.io/ch7/tempflag
+$ ./tempflag
+20°C
+$ ./tempflag -temp -18C
+-18°C
+$ ./tempflag -temp 212°F
+100°C
+$ ./tempflag -temp 273.15K
+invalid value "273.15K" for flag -temp: invalid temperature "273.15K"
+Usage of ./tempflag:
+-temp value
+the temperature (default 20°C)
+$ ./tempflag -help
+Usage of ./tempflag:
+-temp value
+the temperature (default 20°C)
+
+
+%7.5 interface values
+
+a value of an interface type, has two compenents, a concrete type
+and a value of that type
+
+an interface value may hold any arbritrary large data
+
+the zero value of an interface has both type and value set to nil
+
+in general, we cannot know at compile time what the dynamic type of an interfaces
+wvalue will be, so a call through an interface must use dynamic dispatch
+
+%7.5.1 Caveat: An interface Containing a Nil Pointer is Non-Nil
+
+a nil interface valuem which contains no value at all, is not the
+same asan interface value containing a pointer that happens to be nil
+
+ex:
+const debug = true
+func main() {
+  var buf *bytes.Buffer
+  if debug {
+    buf = new(bytes.Buffer) // enable collection of output
+    }
+  f(buf) // NOTE: subtly incorrect!
+  if debug {
+    // ...use buf...
+  }
+}
+// If out is non-nil, output will be written to it.
+func f(out io.Writer) {
+// ...do something...
+  if out != nil {
+    out.Write([]byte("done!\n"))
+  }
+}
+
+the output is actually:
+if out != nil {
+  out.Write([]byte("done!\n")) // panic: nil pointer dereference
+}
+
+when main calls f, it assigns a nil pointer of type *bytes.Buffer
+to the out parameter, so the dynamic type is still *bytes.Buffer
+
+
+note: The
+compiler inserts an implicit * operat ion for us. These two function calls are
+equivalent:
+
+pptr.Distance(q)
+(*pptr).Distance(q)
+
+so: when we do out.write the *bytes.Buffer pointer was dereferenced so it
+was a null value
+
+the solution is:
+var buf io.Writer //instead of var buf *bytes.Buffer
+
+%7.6 sorting with sort.Interface
+
+type Interface interface {
+  Len() int
+  Less(i, j int) bool // i, j are indices of sequence elements
+  Swap(i, j int)
+}
+
+to sort any sequence we need to define a type that imnplements these three
+methods, then apply sort.Sort to an instance of that type.
+
+for example lets try sorting a string slice:
+
+type StringSlice []string
+
+func (p StringSlice) Len() int { return len(p) }
+func (p StringSlice) Less(i, j int) bool { return p[i] < p[j] }
+func (p StringSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+
+now we can now do this:
+
+sort.Sort(StringSlice(names))
+
+note | array of structs subtleties:
+sayans := []*Sayan{
+   &Sayan{Name: "Goku", Power: 9001,}
+ }
+ is the same as
+ sayans := []*Sayan{
+   {Name: "Goku", Power: 9001}
+ }
+
+ ype Track struct {
+   Title string
+   Artist string
+   Album string
+   Year int
+   Length time.Duration
+ }
+
+ another comparison:
+
+ var tracks = []*Track{
+     &Track{"Go", "Delilah", "From the Roots Up", 2012, length("3m38s")},
+     &Track{"Go", "Moby", "Moby", 1992, length("3m37s")},
+     &Track{"Go Ahead", "Alicia Keys", "As I Am", 2007, length("4m36s")},
+     &Track{"Ready 2 Go", "Martin Solveig", "Smash", 2011, length("4m24s")},
+     }
+
+     and
+
+  var tracks = []*Track{
+    {"Go", "Delilah", "From the Roots Up", 2012, length("3m38s")},
+    {"Go", "Moby", "Moby", 1992, length("3m37s")},
+    {"Go Ahead", "Alicia Keys", "As I Am", 2007, length("4m36s")},
+    {"Ready 2 Go", "Martin Solveig", "Smash", 2011, length("4m24s")},
+  }
+
+  also
+
+  var tracks = []Track{
+      Track{"Go", "Delilah", "From the Roots Up", 2012, length("3m38s")},
+      Track{"Go", "Moby", "Moby", 1992, length("3m37s")},
+      Track{"Go Ahead", "Alicia Keys", "As I Am", 2007, length("4m36s")},
+      Track{"Ready 2 Go", "Martin Solveig", "Smash", 2011, length("4m24s")},
+      }
+
+  is the same as
+
+  var tracks = []Track{
+      {"Go", "Delilah", "From the Roots Up", 2012, length("3m38s")},
+      {"Go", "Moby", "Moby", 1992, length("3m37s")},
+      {"Go Ahead", "Alicia Keys", "As I Am", 2007, length("4m36s")},
+      {"Ready 2 Go", "Martin Solveig", "Smash", 2011, length("4m24s")},
+      }
+
+%7.7 the http.Handler Interface
+
+package http
+type Handler interface {
+  ServeHTTP(w ResponseWriter, r *Request)
+}
+func ListenAndServe(address string, h Handler) error
+
+
+
+func (db database) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+  switch req.URL.Path {
+  case "/list":
+    for item, price := range db {
+      fmt.Fprintf(w, "%s: %s\n", item, price)
+    }
+  case "/price":
+    item := req.URL.Query().Get("item")
+    price, ok := db[item]
+    if !ok {
+      w.WriteHeader(http.StatusNotFound) // 404
+        fmt.Fprintf(w, "no such item: %q\n", item)
+        return
+      }
+      fmt.Fprintf(w, "%s\n", price)
+    default:
+      w.WriteHeader(http.StatusNotFound) // 404
+      fmt.Fprintf(w, "no such page: %s\n", req.URL)
+    }
+}
+
+%7.8 The Error Interface
+
+type error interface {
+  Error() string
+}
+
+simplest wat to create an error is using erros.New
+
+package errors
+
+func New(text string) error { return &errorString{text} }
+
+type errorString struct { text string }
+
+func (e *errorString) Error() string { return e.text }
+
+the reason that the pointer type *errorString, not errorString alone, satisfies
+the error interface is so that every vall to New allocates a distinct
+error instance that is equal to no other
+
+%7.9 Example: Expression Evaluator
+
+look in book
+
+%7.10 Type Assertions:
+
+a type assertion is an operation applied to an interface value.
+syntatically it looks like x.(T) where x is an expression of an interface type
+and T is a type, called the "asserted" type. A type assertion checks that the
+dynamic type of its operand matches the asserted type
+
+ex.
+var w io.Writer
+w=os.Stdout
+f := w.(*os.File) // success: f == os.Stdout
+c := w.(*bytes.Buffer) // panic: interface holds *os.File, not *bytes.Buffer
+
+
+here the operation does not panic on failure but return
+a boolean as the 2nd argument
+
+var w io.Writer = os.Stdout
+f, ok := w.(*os.File) // success: ok, f == os.Stdout
+b, ok := w.(*bytes.Buffer) // failure: !ok, b == nil
+
+%7.11 Discriminating Errors with Type Assertions
+
+consider the example of different errors:
+file already exits
+file not found
+permission denied
+
+package os
+func IsExist(err error) bool
+func IsNotExist(err error) bool
+func IsPermission(err error) bool
+
+a naive approach would be checking the error messages
+
+a more robust approach would be having a dedicated struct
+
+package os
+// PathError records an error and the operation and file path that caused it.
+type PathError struct {
+Op string
+Path string
+Err error
+}
+func (e *PathError) Error() string {
+return e.Op + " " + e.Path + ": " + e.Err.Error()
+}
+
+note: always use the pointer for reciever so error is unique
+
+%7.12 querying behaviors with interface type assertions
+
+read book
+
+%7.13 Type Switches
+
+there are two styles of polymorphism in OOP
+subtype polymorphism
+ad hoc polymorphism
+
+we are going to explore adhoc
+
+ex.
+switch x.(type) {
+case nil: // ...
+case int, uint: // ...
+case bool: // ...
+case string: // ...
+default: // ...
+}
+
+%7.14 example: token-based xml Decoding
+read from book
 */
 
 package main
