@@ -1251,7 +1251,7 @@ you can alsp make a map of a map:
   //calling methods
   (*Point).ScaleBy(8.3)
 
-  compiler inserts an implicit * operat ion for us. These two function calls are
+  compiler inserts an implicit * operation for us. These two function calls are
   equivalent:
 
   pptr.Distance(q)
