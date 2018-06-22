@@ -34,6 +34,10 @@ func (q* Queue) Pop() (string, bool) {
   return "", false
 }
 
+func (q* Queue) IsEmpty() bool {
+  return q.size == 0
+}
+
 func NewQueries() *Queue {
   queries := NewQueue()
   for {
