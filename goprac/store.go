@@ -7,7 +7,7 @@ import (
   //  "io"
     "encoding/json"
     //"strconv"
-    "reflect"
+  //  "reflect"
 )
 
 type Queue struct {
@@ -81,26 +81,15 @@ func (s *Store) Exec(query string, results *[]string) {
 
   pos := Pos(query,' ')
   command  := query[0: pos]
-  document := query[pos + 1:]
-  var jsonObject interface{}
-  fmt.Println("document: " + document)
-  json.Unmarshal([]byte(document), &jsonObject)
-  page := jsonObject.(map[string]interface{})
+  doc := query[pos + 1:]
+  //fmt.Println("document: " + doc)
 
   switch command {
   case  "add":
-      fmt.Println("adding: " + document)
-
-      fmt.Println("------------------")
-      for key, value := range page {
-        fmt.Println( key, " : ",value)
-      }
-      fmt.Println("------------------")
-
-      s.Add(document)
+      s.Add(doc)
   case "get":
-    fmt.Println("getting: " + document)
-    s.Get(document)
+    fmt.Println("getting: " + doc)
+    s.Get(doc)
   default:
     fmt.Println("command does not exist")
   }
@@ -120,8 +109,6 @@ func (s *Store) Get(document string) []string {
   var jsonObject interface{}
   json.Unmarshal([]byte(document), &jsonObject)
   docObj := jsonObject.(map[string]interface{})
-
-
   for _, value := range s.storage {
     var jsonObject interface{}
     json.Unmarshal([]byte(value), &jsonObject)
@@ -173,7 +160,7 @@ converts bool to string
 IsMatchObjObj : check if the document is within the page when both parameters are map[string]interface{}
 
 */
-func IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
+func IsMatchObjObj(page, document interface{}) (flag bool) {
   /*
   bool, for JSON booleans
   float64, for JSON numbers
@@ -181,90 +168,24 @@ func IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
   []interface{}, for JSON arrays
   map[string]interface{}, for JSON objects
   nil for JSON null
-
 */
 defer  func() { if p := recover(); p != nil {
+      fmt.Errorf("Get paniced!!")
       flag = false
       return
   }
 }()
-
-  for k1, v1 := range document {
-    for k2, v2 := range page {
-    //  fmt.Println(k2)
-    //  fmt.Println(reflect.TypeOf(v2).Kind())
-      fmt.Println(k1," ",k2, " ", v1, " ", v2)
-      if k1 == k2 {
-        if reflect.TypeOf(v1).Kind() == reflect.Bool || reflect.TypeOf(v1).Kind() == reflect.Float64 || reflect.TypeOf(v1).Kind() == reflect.String{
-          if reflect.TypeOf(v1).Kind() == reflect.TypeOf(v2).Kind() {
-              flag = (v1 == v2)
-            }
-          }
-        } else if reflect.TypeOf(v1).Kind() == reflect.Map{
-          if (reflect.TypeOf(v2).Kind() == reflect.Map) {
-            flag = IsMatchObjObj(v2, v1)
-          } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
-            flag = IsMatchArrObj(v2, v1)
-        } else if reflect.TypeOf(v1).Kind() == reflect.Slice{
-          if (reflect.TypeOf(v2).Kind() == reflect.Map) {
-            flag = IsMatchObjArr(v2, v1)
-          } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
-            flag = IsMatchArrArr(v2, v1)
-          }
-        } else {
-          flag = false
-        }
-      }
-    }
-  }
+  p_pg, _ := json.Marshal(page)
+  p_doc, _ := json.Marshal(document)
+  pg :=  fmt.Sprintf("%s",p_pg)
+  doc := fmt.Sprintf("%s", p_doc)
+  fmt.Println("page: ", pg)
+  fmt.Println("document: ", doc)
   return
 }
 
 //2.0
-func IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
-  /*
-  bool, for JSON booleans
-  float64, for JSON numbers
-  string, for JSON strings
-  []interface{}, for JSON arrays
-  map[string]interface{}, for JSON objects
-  nil for JSON null
 
-*/
-defer  func() { if p := recover(); p != nil {
-      flag = false
-      return
-  }
-}()
-
-  for docK, docV := range document {
-    for pageK,pageV :=  range page {
-      if (k1 == k2) {
-        if reflect.TypeOf(v1).Kind() == reflect.Bool || reflect.TypeOf(v1).Kind() == reflect.Float64 || reflect.TypeOf(v1).Kind() == reflect.String{
-          if reflect.TypeOf(v1).Kind() == reflect.TypeOf(v2).Kind() {
-              flag = (v1 == v2)
-            }
-         } else if reflect.TypeOf(v1).Kind() == reflect.Map{
-           if (reflect.TypeOf(v2).Kind() == reflect.Map) {
-             flag = IsMatchObjObj(v2, v1)
-           } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
-             flag = IsMatchArrObj(v2, v1)
-         } else if reflect.TypeOf(v1).Kind() == reflect.Slice{
-           if (reflect.TypeOf(v2).Kind() == reflect.Map) {
-             flag = IsMatchObjArr(v2, v1)
-           } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
-             flag = IsMatchArrArr(v2, v1)
-           }
-         }
-       }
-     } else {
-
-     }
-   }
- }
-
-  return
-}
 
 
 func main() {
