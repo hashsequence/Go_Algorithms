@@ -126,7 +126,7 @@ func (s *Store) Get(document string) []string {
     var jsonObject interface{}
     json.Unmarshal([]byte(value), &jsonObject)
     page := jsonObject.(map[string]interface{})
-    if s.IsMatchObjObj(page, docObj) {
+    if IsMatchObjObj(page, docObj) {
         //res = append (res, document)
         fmt.Println(docObj, " is in ", page)
     } else {
@@ -168,8 +168,12 @@ func Pos(s string, value rune) int {
 converts bool to string
 */
 
+/*
 
-func (s *Store) IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
+IsMatchObjObj : check if the document is within the page when both parameters are map[string]interface{}
+
+*/
+func IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
   /*
   bool, for JSON booleans
   float64, for JSON numbers
@@ -193,20 +197,72 @@ defer  func() { if p := recover(); p != nil {
       if k1 == k2 {
         if reflect.TypeOf(v1).Kind() == reflect.Bool || reflect.TypeOf(v1).Kind() == reflect.Float64 || reflect.TypeOf(v1).Kind() == reflect.String{
           if reflect.TypeOf(v1).Kind() == reflect.TypeOf(v2).Kind() {
-              flag = true
+              flag = (v1 == v2)
             }
           }
         } else if reflect.TypeOf(v1).Kind() == reflect.Map{
-          if
-
+          if (reflect.TypeOf(v2).Kind() == reflect.Map) {
+            flag = IsMatchObjObj(v2, v1)
+          } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
+            flag = IsMatchArrObj(v2, v1)
         } else if reflect.TypeOf(v1).Kind() == reflect.Slice{
-
+          if (reflect.TypeOf(v2).Kind() == reflect.Map) {
+            flag = IsMatchObjArr(v2, v1)
+          } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
+            flag = IsMatchArrArr(v2, v1)
+          }
         } else {
           flag = false
         }
-      } 
+      }
     }
   }
+  return
+}
+
+//2.0
+func IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
+  /*
+  bool, for JSON booleans
+  float64, for JSON numbers
+  string, for JSON strings
+  []interface{}, for JSON arrays
+  map[string]interface{}, for JSON objects
+  nil for JSON null
+
+*/
+defer  func() { if p := recover(); p != nil {
+      flag = false
+      return
+  }
+}()
+
+  for docK, docV := range document {
+    for pageK,pageV :=  range page {
+      if (k1 == k2) {
+        if reflect.TypeOf(v1).Kind() == reflect.Bool || reflect.TypeOf(v1).Kind() == reflect.Float64 || reflect.TypeOf(v1).Kind() == reflect.String{
+          if reflect.TypeOf(v1).Kind() == reflect.TypeOf(v2).Kind() {
+              flag = (v1 == v2)
+            }
+         } else if reflect.TypeOf(v1).Kind() == reflect.Map{
+           if (reflect.TypeOf(v2).Kind() == reflect.Map) {
+             flag = IsMatchObjObj(v2, v1)
+           } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
+             flag = IsMatchArrObj(v2, v1)
+         } else if reflect.TypeOf(v1).Kind() == reflect.Slice{
+           if (reflect.TypeOf(v2).Kind() == reflect.Map) {
+             flag = IsMatchObjArr(v2, v1)
+           } else if (reflect.TypeOf(v2).Kind() == reflect.Slice) {
+             flag = IsMatchArrArr(v2, v1)
+           }
+         }
+       }
+     } else {
+
+     }
+   }
+ }
+
   return
 }
 
