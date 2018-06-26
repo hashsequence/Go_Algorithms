@@ -7,7 +7,7 @@ import (
   //  "io"
     "encoding/json"
     //"strconv"
-    //"reflect"
+    "reflect"
 )
 
 type Queue struct {
@@ -72,7 +72,7 @@ type Store struct{
   storage []string
 }
 
-func (s *Store) Exec(query string, results *Store) {
+func (s *Store) Exec(query string, results *[]string) {
   //parse query
   defer  func() { if p := recover(); p != nil {
         return
@@ -85,24 +85,22 @@ func (s *Store) Exec(query string, results *Store) {
   var jsonObject interface{}
   fmt.Println("document: " + document)
   json.Unmarshal([]byte(document), &jsonObject)
-  obj := jsonObject.(map[string]interface{})
+  page := jsonObject.(map[string]interface{})
+
   switch command {
   case  "add":
       fmt.Println("adding: " + document)
 
       fmt.Println("------------------")
-
-      for key, value := range obj {
+      for key, value := range page {
         fmt.Println( key, " : ",value)
       }
-
-      //fmt.Println(obj["fruits"])
-      //fmt.Println(obj["vegetables"])
       fmt.Println("------------------")
+
       s.Add(document)
   case "get":
     fmt.Println("getting: " + document)
-    s.Get(obj, document)
+    s.Get(document)
   default:
     fmt.Println("command does not exist")
   }
@@ -112,25 +110,43 @@ func (s *Store) Add(document string) {
   s.storage = append (s.storage, document)
 }
 
-func (s *Store) Get(obj map[string]interface{}, document string) []string {
+func (s *Store) Get(document string) []string {
+  defer  func() { if p := recover(); p != nil {
+        return
+    }
+  }()
+
   res := []string{}
   var jsonObject interface{}
   json.Unmarshal([]byte(document), &jsonObject)
   docObj := jsonObject.(map[string]interface{})
-  if IsMatchObj(obj, docObj) {
-      //res = append (res, document)
+
+
+  for _, value := range s.storage {
+    var jsonObject interface{}
+    json.Unmarshal([]byte(value), &jsonObject)
+    page := jsonObject.(map[string]interface{})
+    if s.IsMatchObjObj(page, docObj) {
+        //res = append (res, document)
+        fmt.Println(docObj, " is in ", page)
+    } else {
+        fmt.Println(docObj, " is not in ", page)
+    }
+
   }
+
+
   return res
 }
 
 func (s *Store) Process(queries *Queue) []string {
-  results := Store{[]string{}}
+  res := []string{}
   fmt.Println("queries.data: ", queries.data)
   for _,query := range queries.data {
-    s.Exec(query, &results)
+    s.Exec(query, &res)
     queries.Pop()
   }
-  return results.storage
+  return res
 }
 /*******************************************
 helper functions
@@ -153,7 +169,7 @@ converts bool to string
 */
 
 
-func IsMatchObj(obj map[string]interface{}, document map[string]interface{}) (bool) {
+func (s *Store) IsMatchObjObj(page, document map[string]interface{}) (flag bool) {
   /*
   bool, for JSON booleans
   float64, for JSON numbers
@@ -161,9 +177,39 @@ func IsMatchObj(obj map[string]interface{}, document map[string]interface{}) (bo
   []interface{}, for JSON arrays
   map[string]interface{}, for JSON objects
   nil for JSON null
+
 */
-    return true
+defer  func() { if p := recover(); p != nil {
+      flag = false
+      return
+  }
+}()
+
+  for k1, v1 := range document {
+    for k2, v2 := range page {
+    //  fmt.Println(k2)
+    //  fmt.Println(reflect.TypeOf(v2).Kind())
+      fmt.Println(k1," ",k2, " ", v1, " ", v2)
+      if k1 == k2 {
+        if reflect.TypeOf(v1).Kind() == reflect.Bool || reflect.TypeOf(v1).Kind() == reflect.Float64 || reflect.TypeOf(v1).Kind() == reflect.String{
+          if reflect.TypeOf(v1).Kind() == reflect.TypeOf(v2).Kind() {
+              flag = true
+            }
+          }
+        } else if reflect.TypeOf(v1).Kind() == reflect.Map{
+          if
+
+        } else if reflect.TypeOf(v1).Kind() == reflect.Slice{
+
+        } else {
+          flag = false
+        }
+      } 
+    }
+  }
+  return
 }
+
 
 func main() {
   datastore := &Store{[]string{}}
