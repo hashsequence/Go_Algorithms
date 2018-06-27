@@ -120,9 +120,10 @@ func (s *Store) Get(document string, results *[]string) {
   }()
     fmt.Println("-------------------------------------------")
   for _, page := range s.storage {
+   fmt.Println("GET | PAGE: ", page)
     if CheckIfPageContainsDoc(page, document) {
       // *results = append (*results, document)
-       fmt.Println(document, " is in ", page)
+        fmt.Println(document, " is in ", page)
     } else {
         fmt.Println(document, " is not in ", page)
     }
@@ -165,6 +166,14 @@ CheckIfPageContainsDoc : check if the document is within the page of the storage
 
 ******************************************************************/
 
+
+
+
+
+
+
+
+
 func CheckIfPageContainsDoc(page, document string) (flag bool) {
   /*
   bool, for JSON booleans
@@ -194,12 +203,15 @@ defer  func() { if p := recover(); p != nil {
   //doc_str := fmt.Sprintf("%s", doc_byte)
 //  pg_str, _ = strconv.Unquote(pg_str)
   //doc_str, _ = strconv.Unquote(doc_str)
-//  fmt.Println("GET | page: ", pg, "\n")
-  //fmt.Println("GET | document: ", doc, "\n")
-  flag = true
+fmt.Println("GET | page: ", pg, "\n")
+fmt.Println("GET | document: ", doc, "\n")
+
+  flag = false
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok {
+     flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
+       fmt.Println("comparing ", pg[doc_key], " and ", pg[doc_key])
        if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
          if !reflect.DeepEqual(pg[doc_key], doc_value) {
            flag = false
@@ -211,27 +223,35 @@ defer  func() { if p := recover(); p != nil {
        }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
        if reflect.TypeOf(doc_value).Kind() == reflect.Map {
-            reflect.DeepEqual(pg[doc_key].(map[string]interface{}),doc_value.(map[string]interface{}))
+         fmt.Println("comparing ", pg[doc_key].(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
          /*
+            if reflect.DeepEqual(pg[doc_key].(map[string]interface{}),doc_value.(map[string]interface{})) {
+              flag = false
+              return
+            }
+            */
+
          if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
            flag = false
            return
          }
-         */
+
        }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
        if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
-         reflect.DeepEqual(pg[doc_key].([]interface{}),doc_value.([]interface{}))
-         /*
-         if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+          fmt.Println("comparing ", pg[doc_key].([]interface{}), " and ", pg[doc_key].([]interface{}))
+          /*
+         if !reflect.DeepEqual(pg[doc_key].([]interface{}),doc_value.([]interface{})) {
            flag = false
            return
          }
          */
+         if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+           flag = false
+           return
+         }
+
        }
-     } else {
-       flag = false
-       return
      }
    } /*else {
      for pg_key, pg_value := range pg {
