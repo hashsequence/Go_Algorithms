@@ -1099,6 +1099,17 @@ you can alsp make a map of a map:
     the function type of a variadic function is is distinct from a
     a fucntion with a slice type parameters
 
+
+    value... is like a spread operator
+
+    I can also do this :
+
+    a = append(a[:0], a[1:]...)
+
+    is essentially:
+
+    a = append(a[:0], a[1], a[2])
+
   %5.8 deferred function calls
 
   a defer statement is an ordinary funciton or method call prefixed by

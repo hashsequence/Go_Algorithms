@@ -6,8 +6,9 @@ import (
     "os"
   //  "io"
     "encoding/json"
+  //  "strings"
     //"strconv"
-  //  "reflect"
+    "reflect"
 )
 
 type Queue struct {
@@ -88,50 +89,54 @@ func (s *Store) Exec(query string, results *[]string) {
   case  "add":
       s.Add(doc)
   case "get":
-    fmt.Println("getting: " + doc)
-    s.Get(doc)
+//    fmt.Println("getting: " + doc)
+   s.Get(doc, results)
+  case "delete":
+    s.Delete(doc)
   default:
     fmt.Println("command does not exist")
   }
 }
 
 func (s *Store) Add(document string) {
+  fmt.Println("-------------------------------------------")
+  fmt.Println("ADD | Document: ", document, "\n")
   s.storage = append (s.storage, document)
+  fmt.Println("-------------------------------------------")
 }
 
-func (s *Store) Get(document string) []string {
+func (s *Store) Delete(document string) {
+  for i, page := range s.storage {
+    if CheckIfPageContainsDoc(page, document) {
+      s.storage = append(s.storage[:i], s.storage[i+1:]...)
+    }
+  }
+}
+
+func (s *Store) Get(document string, results *[]string) {
   defer  func() { if p := recover(); p != nil {
         return
     }
   }()
-
-  res := []string{}
-  var jsonObject interface{}
-  json.Unmarshal([]byte(document), &jsonObject)
-  docObj := jsonObject.(map[string]interface{})
-  for _, value := range s.storage {
-    var jsonObject interface{}
-    json.Unmarshal([]byte(value), &jsonObject)
-    page := jsonObject.(map[string]interface{})
-    if IsMatchObjObj(page, docObj) {
-        //res = append (res, document)
-        fmt.Println(docObj, " is in ", page)
+    fmt.Println("-------------------------------------------")
+  for _, page := range s.storage {
+    if CheckIfPageContainsDoc(page, document) {
+      // *results = append (*results, document)
+      //  fmt.Println(docObj, " is in ", page)
     } else {
-        fmt.Println(docObj, " is not in ", page)
+        //fmt.Println(docObj, " is not in ", page)
     }
 
   }
+    fmt.Println("-------------------------------------------")
 
-
-  return res
 }
 
 func (s *Store) Process(queries *Queue) []string {
   res := []string{}
-  fmt.Println("queries.data: ", queries.data)
+//  fmt.Println("queries.data: ", queries.data)
   for _,query := range queries.data {
     s.Exec(query, &res)
-    queries.Pop()
   }
   return res
 }
@@ -154,13 +159,13 @@ func Pos(s string, value rune) int {
 /*
 converts bool to string
 */
+/*****************************************************************
+CheckIfPageContainsDoc : check if the document is within the page of the storage
 
-/*
 
-IsMatchObjObj : check if the document is within the page when both parameters are map[string]interface{}
+******************************************************************/
 
-*/
-func IsMatchObjObj(page, document interface{}) (flag bool) {
+func CheckIfPageContainsDoc(page, document string) (flag bool) {
   /*
   bool, for JSON booleans
   float64, for JSON numbers
@@ -175,25 +180,120 @@ defer  func() { if p := recover(); p != nil {
       return
   }
 }()
-  p_pg, _ := json.Marshal(page)
-  p_doc, _ := json.Marshal(document)
-  pg :=  fmt.Sprintf("%s",p_pg)
-  doc := fmt.Sprintf("%s", p_doc)
-  fmt.Println("page: ", pg)
-  fmt.Println("document: ", doc)
+  //pg_byte, _ := json.Marshal(page)
+//  doc_byte, _ := json.Marshal(document)
+  var jsonObject interface{}
+  var jsonObject2 interface{}
+  //json.Unmarshal(pg_byte, &jsonObject)
+  //json.Unmarshal(doc_byte, &jsonObject2)
+  json.Unmarshal([]byte(page), &jsonObject)
+  json.Unmarshal([]byte(document), &jsonObject2)
+  pg := jsonObject.(map[string]interface{})
+  doc := jsonObject2.(map[string]interface{})
+  //pg_str :=  fmt.Sprintf("%s",pg_byte)
+  //doc_str := fmt.Sprintf("%s", doc_byte)
+//  pg_str, _ = strconv.Unquote(pg_str)
+  //doc_str, _ = strconv.Unquote(doc_str)
+//  fmt.Println("GET | page: ", pg, "\n")
+  //fmt.Println("GET | document: ", doc, "\n")
+
+  for doc_key, doc_value := range doc {
+   if _, ok:= pg[doc_key]; ok {
+     if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
+       if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value) {
+         if pg[doc_key] != doc_value {
+           flag = false
+           return
+         }
+       } else {
+         flag = false
+         return
+       }
+     } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
+       if reflect.TypeOf(doc_value) == reflect.Map {
+         if !CompareObj(pg[doc_key], doc_value) {
+           flag = false
+           return
+         }
+       }
+     } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
+       if reflect.TypeOf(doc_value) == reflect.Slice {
+         if !CompareArr(pg[doc_key], doc_value) {
+           flag = false
+           return
+         }
+       }
+     } else {
+       flag = false
+       return
+     }
+   } else {
+     for pg_key, pg_value := range pg {
+       if reflect.TypeOf(pg_value).Kind() == reflect.Map {
+
+       } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
+
+       }
+     }
+   }
+  }
+
   return
 }
 
-//2.0
+/***************************************************
+Compare Functions:
 
+I could have made a polymorphic compare function using the empty interface{} type
+and using type switches, but I have elected to split into two functions for
+performance benifits since using parametric polymorphism will be slower than
+having concrete parameter types
+*****************************************************/
+func CompareObj (page_Obj, doc_Obj, map[string]interface{}) bool {
+
+}
+
+func CompareArr (page_arr, doc_arr, []interface{}) bool {
+  for _, ele := range doc_arr {
+    if reflect.TypeOf(ele).Kind() == reflect.Bool || reflect.TypeOf(ele).Kind() == reflect.Float64 || reflect.TypeOf(ele).Kind() == reflect.String {
+      if !Contains(page_arr, ele) {
+        return false
+      } else if reflect.TypeOf(ele).Kind() == reflect.Map  {
+
+      } else if reflect.TypeOf(ele).Kind() == reflect.Slice  {
+
+      } else {
+        return false
+      }
+      )
+    }
+  }
+  return true
+}
+
+func Contains(s []interface{}, e interface{}) bool {
+    for _, a := range s {
+        if a == e {
+            return true
+        }
+    }
+    return false
+}
 
 
 func main() {
   datastore := &Store{[]string{}}
   queries := NewQueries()
   datastore.Process(queries)
-  fmt.Println(datastore.storage)
-  //fmt.Println(queries.data)
+  fmt.Println("\n")
+  for _, value := range datastore.storage {
+      fmt.Println("STORAGE: ", value)
+  }
+  fmt.Println("\n")
+  for _, value := range queries.data {
+      fmt.Println("QUERIES: ", value)
+  }
+
 
 
 }
