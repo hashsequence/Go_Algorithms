@@ -211,7 +211,7 @@ fmt.Println("GET | document: ", doc, "\n")
    if _, ok:= pg[doc_key]; ok {
      flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
-       fmt.Println("comparing ", pg[doc_key], " and ", pg[doc_key])
+       fmt.Println("comparing ", doc_value, " and ", pg[doc_key])
        if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
          if !reflect.DeepEqual(pg[doc_key], doc_value) {
            flag = false
@@ -223,7 +223,7 @@ fmt.Println("GET | document: ", doc, "\n")
        }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
        if reflect.TypeOf(doc_value).Kind() == reflect.Map {
-         fmt.Println("comparing ", pg[doc_key].(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
+         fmt.Println("comparing ", doc_value.(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
          /*
             if reflect.DeepEqual(pg[doc_key].(map[string]interface{}),doc_value.(map[string]interface{})) {
               flag = false
@@ -239,7 +239,7 @@ fmt.Println("GET | document: ", doc, "\n")
        }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
        if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
-          fmt.Println("comparing ", pg[doc_key].([]interface{}), " and ", pg[doc_key].([]interface{}))
+          fmt.Println("comparing ", doc_value.([]interface{}), " and ", pg[doc_key].([]interface{}))
           /*
          if !reflect.DeepEqual(pg[doc_key].([]interface{}),doc_value.([]interface{})) {
            flag = false
@@ -277,33 +277,25 @@ func CompareObj (pg, doc map[string]interface{}) (flag bool) {
         return
     }
   }()
-  flag = true
+  flag = false
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
+     flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
-       if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
-         if pg[doc_key] != doc_value {
-           flag = false
-           return
-         }
-       } else {
+       if pg[doc_key] != doc_value {
          flag = false
-         return
-       }
+        return
+      }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
-       if reflect.TypeOf(doc_value).Kind() == reflect.Map {
-         if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
-           flag = false
-           return
-         }
-       }
+        if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
+        flag = false
+        return
+      }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
-       if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
          if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
            return
          }
-       }
      } else {
        flag = false
      }
