@@ -5,3 +5,4 @@ get { "fruits" : ["apple",  "orange", "peach"] }
 get { "fruits" : ["apple",  "lime", "peach"] }
 get { "meat" : "beef"}
 get { "lastName" : "Doe"}
+get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}
