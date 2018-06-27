@@ -122,9 +122,9 @@ func (s *Store) Get(document string, results *[]string) {
   for _, page := range s.storage {
     if CheckIfPageContainsDoc(page, document) {
       // *results = append (*results, document)
-      //  fmt.Println(docObj, " is in ", page)
+       fmt.Println(document, " is in ", page)
     } else {
-        //fmt.Println(docObj, " is not in ", page)
+        fmt.Println(document, " is not in ", page)
     }
 
   }
@@ -196,11 +196,72 @@ defer  func() { if p := recover(); p != nil {
   //doc_str, _ = strconv.Unquote(doc_str)
 //  fmt.Println("GET | page: ", pg, "\n")
   //fmt.Println("GET | document: ", doc, "\n")
-
+  flag = true
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok {
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
-       if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value) {
+       if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
+         if !reflect.DeepEqual(pg[doc_key], doc_value) {
+           flag = false
+           return
+         }
+       } else {
+         flag = false
+         return
+       }
+     } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
+       if reflect.TypeOf(doc_value).Kind() == reflect.Map {
+            reflect.DeepEqual(pg[doc_key].(map[string]interface{}),doc_value.(map[string]interface{}))
+         /*
+         if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
+           flag = false
+           return
+         }
+         */
+       }
+     } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
+       if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
+         reflect.DeepEqual(pg[doc_key].([]interface{}),doc_value.([]interface{}))
+         /*
+         if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+           flag = false
+           return
+         }
+         */
+       }
+     } else {
+       flag = false
+       return
+     }
+   } /*else {
+     for pg_key, pg_value := range pg {
+       if reflect.TypeOf(pg_value).Kind() == reflect.Map {
+
+       } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
+
+       }
+     }
+   }*/
+  }
+
+  return
+}
+
+/***************************************************
+Compare Functions
+*****************************************************/
+func CompareObj (pg, doc map[string]interface{}) (flag bool) {
+  defer  func() { if p := recover(); p != nil {
+        fmt.Errorf("Get paniced!!")
+        flag = false
+        return
+    }
+  }()
+  flag = true
+  for doc_key, doc_value := range doc {
+   if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
+     if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
+       if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
          if pg[doc_key] != doc_value {
            flag = false
            return
@@ -210,72 +271,70 @@ defer  func() { if p := recover(); p != nil {
          return
        }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
-       if reflect.TypeOf(doc_value) == reflect.Map {
-         if !CompareObj(pg[doc_key], doc_value) {
+       if reflect.TypeOf(doc_value).Kind() == reflect.Map {
+         if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
            flag = false
            return
          }
        }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
-       if reflect.TypeOf(doc_value) == reflect.Slice {
-         if !CompareArr(pg[doc_key], doc_value) {
+       if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
+         if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
            return
          }
        }
      } else {
        flag = false
-       return
      }
    } else {
-     for pg_key, pg_value := range pg {
-       if reflect.TypeOf(pg_value).Kind() == reflect.Map {
-
-       } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
-
-       }
-     }
+     flag =  false
    }
-  }
-
-  return
+ }
+ return
 }
 
-/***************************************************
-Compare Functions:
-
-I could have made a polymorphic compare function using the empty interface{} type
-and using type switches, but I have elected to split into two functions for
-performance benifits since using parametric polymorphism will be slower than
-having concrete parameter types
-*****************************************************/
-func CompareObj (page_Obj, doc_Obj, map[string]interface{}) bool {
-
-}
-
-func CompareArr (page_arr, doc_arr, []interface{}) bool {
-  for _, ele := range doc_arr {
-    if reflect.TypeOf(ele).Kind() == reflect.Bool || reflect.TypeOf(ele).Kind() == reflect.Float64 || reflect.TypeOf(ele).Kind() == reflect.String {
-      if !Contains(page_arr, ele) {
-        return false
-      } else if reflect.TypeOf(ele).Kind() == reflect.Map  {
-
-      } else if reflect.TypeOf(ele).Kind() == reflect.Slice  {
-
-      } else {
-        return false
-      }
-      )
+func CompareArr(pg, doc []interface{}) (flag bool) {
+  defer  func() { if p := recover(); p != nil {
+        fmt.Errorf("Get paniced!!")
+        flag = false
+        return
+    }
+  }()
+  for _, doc_value := range doc {
+    if !Contains(pg, doc_value) {
+      return false
     }
   }
   return true
 }
 
 func Contains(s []interface{}, e interface{}) bool {
+  defer  func() bool { if p := recover(); p != nil {
+        fmt.Errorf("Get paniced!!")
+        return false
+    }
+    return true
+  }()
     for _, a := range s {
-        if a == e {
+      switch reflect.ValueOf(e).Kind() {
+      case reflect.Map:
+        if reflect.TypeOf(a).Kind() == reflect.Map {
+          if CompareObj(a.(map[string]interface{}), e.(map[string]interface{})) {
             return true
+          }
         }
+      case reflect.Slice:
+        if reflect.TypeOf(a).Kind() == reflect.Slice {
+          if CompareArr(a.([]interface{}), e.([]interface{})) {
+            return true
+          }
+        }
+      default:
+        if reflect.DeepEqual(a,e) {
+          return true
+        }
+      }
     }
     return false
 }
