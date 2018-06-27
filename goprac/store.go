@@ -208,21 +208,16 @@ fmt.Println("GET | document: ", doc, "\n")
 
   flag = false
   for doc_key, doc_value := range doc {
-   if _, ok:= pg[doc_key]; ok {
+   if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind(){
      flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
        fmt.Println("comparing ", doc_value, " and ", pg[doc_key])
-       if reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
          if !reflect.DeepEqual(pg[doc_key], doc_value) {
            flag = false
            return
          }
-       } else {
-         flag = false
-         return
-       }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
-       if reflect.TypeOf(doc_value).Kind() == reflect.Map {
+      // if reflect.TypeOf(doc_value).Kind() == reflect.Map {
          fmt.Println("comparing ", doc_value.(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
          /*
             if reflect.DeepEqual(pg[doc_key].(map[string]interface{}),doc_value.(map[string]interface{})) {
@@ -236,9 +231,9 @@ fmt.Println("GET | document: ", doc, "\n")
            return
          }
 
-       }
+       //}
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
-       if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
+       //if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
           fmt.Println("comparing ", doc_value.([]interface{}), " and ", pg[doc_key].([]interface{}))
           /*
          if !reflect.DeepEqual(pg[doc_key].([]interface{}),doc_value.([]interface{})) {
@@ -251,7 +246,7 @@ fmt.Println("GET | document: ", doc, "\n")
            return
          }
 
-       }
+      // }
      }
    } /*else {
      for pg_key, pg_value := range pg {
