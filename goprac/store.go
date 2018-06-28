@@ -7,7 +7,7 @@ import (
   //  "io"
     "encoding/json"
   //  "strings"
-    "strconv"
+  //  "strconv"
     "reflect"
 )
 
@@ -106,11 +106,15 @@ func (s *Store) Add(document string) {
 }
 
 func (s *Store) Delete(document string) {
+    fmt.Println("-------------------------------------------")
+    fmt.Println("DELETE | Document: ", document, "\n")
   for i, page := range s.storage {
     if CheckIfPageContainsDoc(page, document) {
+      fmt.Println("DELETE |  ", document, " matches the page ", page, " so deleting it\n")
       s.storage = append(s.storage[:i], s.storage[i+1:]...)
     }
   }
+    fmt.Println("-------------------------------------------")
 }
 
 func (s *Store) Get(document string, results *[]string) {
@@ -123,24 +127,24 @@ func (s *Store) Get(document string, results *[]string) {
   fmt.Println("GET | DOCUMENT: ", document)
    fmt.Println("GET | PAGE: ", page)
     if CheckIfPageContainsDoc(page, document) {
-      // *results = append (*results, document)
+        *results = append (*results, page)
         fmt.Println(document, " is in ", page)
     } else {
         fmt.Println(document, " is not in ", page)
     }
 
   }
+    fmt.Println("\nGET | FINAL RESULTS | doc: ", document, " | results: ", *results, "\n")
     fmt.Println("-------------------------------------------")
 
 }
 
-func (s *Store) Process(queries *Queue) []string {
-  res := []string{}
+func (s *Store) Process(queries *Queue) {
 //  fmt.Println("queries.data: ", queries.data)
   for _,query := range queries.data {
+    res := []string{}
     s.Exec(query, &res)
   }
-  return res
 }
 /*******************************************
 helper functions
@@ -190,7 +194,7 @@ defer  func() { if p := recover(); p != nil {
       return
   }
 }()
-  pg_byte, _ := json.Marshal(page)
+  //pg_byte, _ := json.Marshal(page)
 //  doc_byte, _ := json.Marshal(document)
   var jsonObject interface{}
   var jsonObject2 interface{}
@@ -200,16 +204,17 @@ defer  func() { if p := recover(); p != nil {
   json.Unmarshal([]byte(document), &jsonObject2)
   pg := jsonObject.(map[string]interface{})
   doc := jsonObject2.(map[string]interface{})
-  pg_str :=  fmt.Sprintf("%s",pg_byte)
+//  pg_str :=  fmt.Sprintf("%s",pg_byte)
   //doc_str := fmt.Sprintf("%s", doc_byte)
-  pg_str, _ = strconv.Unquote(pg_str)
+  //pg_str, _ = strconv.Unquote(pg_str)
   //doc_str, _ = strconv.Unquote(doc_str)
 //fmt.Println("GET | JsonObject: ", jsonObject, "\n")
 fmt.Println("GET | document: ", doc, "\n")
 fmt.Println("GET | page: ", pg, "\n")
 
-
   flag = false
+
+  OuterLoop:
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind(){
      flag = true
@@ -217,8 +222,9 @@ fmt.Println("GET | page: ", pg, "\n")
        fmt.Println("comparing ", doc_value, " and ", pg[doc_key])
          if !reflect.DeepEqual(pg[doc_key], doc_value) {
            flag = false
-           return
+           break
          }
+          fmt.Println("", doc_value, " and ", pg[doc_key], " are equal")
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
       // if reflect.TypeOf(doc_value).Kind() == reflect.Map {
          fmt.Println("comparing ", doc_value.(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
@@ -257,21 +263,39 @@ fmt.Println("GET | page: ", pg, "\n")
          flag = true
          pg_byte, _ := json.Marshal(pg_value)
          sub_page :=  fmt.Sprintf("%s",pg_byte)
-         _, _ = strconv.Unquote(sub_page)
+      //   _, _ = strconv.Unquote(sub_page)
         //fmt.Println("CHECKIFPAGECONTAINSDOC | error: ",err)
-         fmt.Println("CHECKIFPAGECONTAINSDOC | sub_page: ", pg_value)
-         fmt.Println("CHECKIFPAGECONTAINSDOC | looking in the subpage for |", sub_page , " and ", document )
+         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | sub_page: ", pg_value)
+         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for |", sub_page , " and ", document )
          if !CheckIfPageContainsDoc(sub_page, document) {
            flag = false
-           return
+           break OuterLoop
+         } else {
+           flag = true
+           break OuterLoop
          }
+
        } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
+         flag = true
+        // _, _ = strconv.Unquote(sub_page)
+        for _, sub_pg_value := range pg_value.([]interface{}) {
+          sub_pg_byte, _ := json.Marshal(sub_pg_value)
+          sub_page :=  fmt.Sprintf("%s",sub_pg_byte)
+          fmt.Println("CHECKIFPAGECONTAINSFDOC | SLICE | sub_page", sub_page)
+          fmt.Println("CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for |", sub_page , " and ", document )
+          if !CheckIfPageContainsDoc(sub_page, document) {
+            flag = false
+          } else {
+            flag = true
+            break OuterLoop
+          }
+        }
+        break OuterLoop
 
        }
      }
    }
   }
-
   return
 }
 
@@ -317,6 +341,37 @@ func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
      flag =  false
    }
  }
+
+
+ //check if the doc contains the page, note: uncommenting this part turns the function into a equals operation
+/*
+ for pg_key, pg_value := range pg {
+  if _, ok:= doc[pg_key]; ok && reflect.TypeOf(doc[pg_key]).Kind() == reflect.TypeOf(pg_value).Kind() {
+      fmt.Println("IsSubObj in MATCH| comparing ", pg, " and ", doc)
+    if reflect.TypeOf(doc[pg_key]).Kind() == reflect.Bool || reflect.TypeOf(doc[pg_key]).Kind() == reflect.Float64 || reflect.TypeOf(doc[pg_key]).Kind() == reflect.String {
+      if doc[pg_key] != pg_value {
+        flag = false
+       break
+     }
+    } else if reflect.TypeOf(doc[pg_key]).Kind() == reflect.Map {
+       if !IsSubObj(doc[pg_key].(map[string]interface{}), pg_value.(map[string]interface{})) {
+       flag = false
+       break
+     }
+    } else if reflect.TypeOf(doc[pg_key]).Kind() == reflect.Slice {
+        if !ArrHasSameValues(doc[pg_key].([]interface{}), pg_value.([]interface{})) {
+          flag = false
+          break
+        }
+    } else {
+      flag = false
+    }
+  } else {
+         fmt.Println("IsSubObj in NOT MATCH| comparing ", pg, " and ", doc)
+    flag =  false
+  }
+ }
+*/
  return
 }
 
