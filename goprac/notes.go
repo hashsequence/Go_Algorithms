@@ -1,4 +1,15 @@
 /*
+%0 extra notes
+%0.1labels and breaks
+example to break outermoust loop:
+
+FirstLoop:
+    for i := 0; i < 10; i++ {
+    }
+    for i := 0; i < 10; i++ {
+        break FirstLoop
+    }
+
 %2
 ++++++++++++++++++++++++++++++
 %2.3 variables

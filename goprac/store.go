@@ -7,7 +7,7 @@ import (
   //  "io"
     "encoding/json"
   //  "strings"
-    //"strconv"
+    "strconv"
     "reflect"
 )
 
@@ -120,6 +120,7 @@ func (s *Store) Get(document string, results *[]string) {
   }()
     fmt.Println("-------------------------------------------")
   for _, page := range s.storage {
+  fmt.Println("GET | DOCUMENT: ", document)
    fmt.Println("GET | PAGE: ", page)
     if CheckIfPageContainsDoc(page, document) {
       // *results = append (*results, document)
@@ -189,7 +190,7 @@ defer  func() { if p := recover(); p != nil {
       return
   }
 }()
-  //pg_byte, _ := json.Marshal(page)
+  pg_byte, _ := json.Marshal(page)
 //  doc_byte, _ := json.Marshal(document)
   var jsonObject interface{}
   var jsonObject2 interface{}
@@ -199,12 +200,14 @@ defer  func() { if p := recover(); p != nil {
   json.Unmarshal([]byte(document), &jsonObject2)
   pg := jsonObject.(map[string]interface{})
   doc := jsonObject2.(map[string]interface{})
-  //pg_str :=  fmt.Sprintf("%s",pg_byte)
+  pg_str :=  fmt.Sprintf("%s",pg_byte)
   //doc_str := fmt.Sprintf("%s", doc_byte)
-//  pg_str, _ = strconv.Unquote(pg_str)
+  pg_str, _ = strconv.Unquote(pg_str)
   //doc_str, _ = strconv.Unquote(doc_str)
-fmt.Println("GET | page: ", pg, "\n")
+//fmt.Println("GET | JsonObject: ", jsonObject, "\n")
 fmt.Println("GET | document: ", doc, "\n")
+fmt.Println("GET | page: ", pg, "\n")
+
 
   flag = false
   for doc_key, doc_value := range doc {
@@ -226,7 +229,7 @@ fmt.Println("GET | document: ", doc, "\n")
             }
             */
 
-         if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
+         if !IsSubObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
            flag = false
            return
          }
@@ -241,22 +244,32 @@ fmt.Println("GET | document: ", doc, "\n")
            return
          }
          */
-         if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+         if !ArrHasSameValues(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
            return
          }
 
       // }
      }
-   } /*else {
-     for pg_key, pg_value := range pg {
-       if reflect.TypeOf(pg_value).Kind() == reflect.Map {
-
+   } else {
+     for _, pg_value := range pg {
+       if reflect.TypeOf(pg_value).Kind() == reflect.Map{
+         flag = true
+         pg_byte, _ := json.Marshal(pg_value)
+         sub_page :=  fmt.Sprintf("%s",pg_byte)
+         _, _ = strconv.Unquote(sub_page)
+        //fmt.Println("CHECKIFPAGECONTAINSDOC | error: ",err)
+         fmt.Println("CHECKIFPAGECONTAINSDOC | sub_page: ", pg_value)
+         fmt.Println("CHECKIFPAGECONTAINSDOC | looking in the subpage for |", sub_page , " and ", document )
+         if !CheckIfPageContainsDoc(sub_page, document) {
+           flag = false
+           return
+         }
        } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
 
        }
      }
-   }*/
+   }
   }
 
   return
@@ -265,7 +278,10 @@ fmt.Println("GET | document: ", doc, "\n")
 /***************************************************
 Compare Functions
 *****************************************************/
-func CompareObj (pg, doc map[string]interface{}) (flag bool) {
+/*
+IsSubObj : checks if the document is a sub object of the page
+*/
+func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
   defer  func() { if p := recover(); p != nil {
         fmt.Errorf("Get paniced!!")
         flag = false
@@ -273,47 +289,58 @@ func CompareObj (pg, doc map[string]interface{}) (flag bool) {
     }
   }()
   flag = false
+ //check if page contain all the key value pairs of the doc
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
+       fmt.Println("IsSubObj in MATCH| comparing ", doc, " and ", pg)
      flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
        if pg[doc_key] != doc_value {
          flag = false
-        return
+        break
       }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
-        if !CompareObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
+        if !IsSubObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
         flag = false
-        return
+        break
       }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
-         if !CompareArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+         if !ArrHasSameValues(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
-           return
+           break
          }
      } else {
        flag = false
      }
    } else {
+          fmt.Println("IsSubObj in NOT MATCH| comparing ", doc, " and ", pg)
      flag =  false
    }
  }
  return
 }
 
-func CompareArr(pg, doc []interface{}) (flag bool) {
+/*
+checks if the two arrays have the same values
+if I want to compute arrays with the same values and the same count for each element I can use a map to map the elements to the count and then
+check if the two maps are equivalent
+*/
+func ArrHasSameValues(pg, doc []interface{}) (flag bool) {
   defer  func() { if p := recover(); p != nil {
         fmt.Errorf("Get paniced!!")
         flag = false
         return
     }
   }()
+  fmt.Println("ARRHASSAMEVALUE | comparing", pg, " and ", doc)
+  flag = true
   for _, doc_value := range doc {
     if !Contains(pg, doc_value) {
-      return false
+      flag = false
+      break
     }
   }
-  return true
+  return
 }
 
 func Contains(s []interface{}, e interface{}) bool {
@@ -327,13 +354,13 @@ func Contains(s []interface{}, e interface{}) bool {
       switch reflect.ValueOf(e).Kind() {
       case reflect.Map:
         if reflect.TypeOf(a).Kind() == reflect.Map {
-          if CompareObj(a.(map[string]interface{}), e.(map[string]interface{})) {
+          if IsSubObj(a.(map[string]interface{}), e.(map[string]interface{})) {
             return true
           }
         }
       case reflect.Slice:
         if reflect.TypeOf(a).Kind() == reflect.Slice {
-          if CompareArr(a.([]interface{}), e.([]interface{})) {
+          if ArrHasSameValues(a.([]interface{}), e.([]interface{})) {
             return true
           }
         }
@@ -359,6 +386,7 @@ func main() {
   for _, value := range queries.data {
       fmt.Println("QUERIES: ", value)
   }
+
 
 
 

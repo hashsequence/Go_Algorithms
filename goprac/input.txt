@@ -3,6 +3,13 @@ add { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },
 get { "fruits" : ["apple", "peach", "orange"] }
 get { "fruits" : ["apple",  "orange", "peach"] }
 get { "fruits" : ["apple",  "lime", "peach"] }
+get { "fruits" : ["apple",  "peach"] }
+get { "fruits" : ["apple",  "orange", "peach", "banana"] }
+get { "fruits" : ["apple",  "orange", "peach", "apple"] }
 get { "meat" : "beef"}
-get { "lastName" : "Doe"}
 get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}
+get { "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}
+get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }
+get { "lastName" : "Doe"}
+add {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+get {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
