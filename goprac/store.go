@@ -106,12 +106,16 @@ func (s *Store) Add(document string) {
 }
 
 func (s *Store) Delete(document string) {
-    fmt.Println("-------------------------------------------")
+    fmt.Println("\n-------------------------------------------")
     fmt.Println("DELETE | Document: ", document, "\n")
-  for i, page := range s.storage {
+    new_storage := []string{}
+  for _, page := range s.storage {
+
     if CheckIfPageContainsDoc(page, document) {
       fmt.Println("DELETE |  ", document, " matches the page ", page, " so deleting it\n")
-      s.storage = append(s.storage[:i], s.storage[i+1:]...)
+      new_storage = FilterArr(s.storage, func())
+    } else {
+        fmt.Println("DELETE |  ", document, "doesnt matches the page ", page, " \n")
     }
   }
     fmt.Println("-------------------------------------------")
@@ -140,12 +144,15 @@ func (s *Store) Get(document string, results *[]string) {
 
 }
 
-func (s *Store) Process(queries *Queue) {
+func (s *Store) Process(queries *Queue) []string {
 //  fmt.Println("queries.data: ", queries.data)
+  final_res := []string{}
   for _,query := range queries.data {
     res := []string{}
     s.Exec(query, &res)
+    final_res = append(final_res, res...)
   }
+  return final_res
 }
 /*******************************************
 helper functions
@@ -164,8 +171,16 @@ func Pos(s string, value rune) int {
 }
 
 /*
-converts bool to string
+filter: filter a slice that meets a certain condition
 */
+func FilterArr(arr []string, condition func(string) bool) (ret []string) {
+    for _, s := range arr {
+        if condition(s) {
+            ret = append(ret, s)
+        }
+    }
+    return
+}
 /*****************************************************************
 CheckIfPageContainsDoc : check if the document is within the page of the storage
 
@@ -473,7 +488,7 @@ func CheckIfArrContainsDoc(pg []interface{}, doc map[string]interface{}) (flag b
 func main() {
   datastore := &Store{[]string{}}
   queries := NewQueries()
-  datastore.Process(queries)
+  res := datastore.Process(queries)
   fmt.Println("\n")
   for _, value := range datastore.storage {
       fmt.Println("STORAGE: ", value)
@@ -482,7 +497,7 @@ func main() {
   for _, value := range queries.data {
       fmt.Println("QUERIES: ", value)
   }
-
+  fmt.Println("FINAL RESULTS | ", res)
 
 
 

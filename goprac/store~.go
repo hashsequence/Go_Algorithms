@@ -106,14 +106,14 @@ func (s *Store) Add(document string) {
 }
 
 func (s *Store) Delete(document string) {
-    fmt.Println("-------------------------------------------")
+    fmt.Println("\n-------------------------------------------")
     fmt.Println("DELETE | Document: ", document, "\n")
 
     var jsonObject2 interface{}
     json.Unmarshal([]byte(document), &jsonObject2)
     doc := jsonObject2.(map[string]interface{})
 
-  for i, page := range s.storage {
+  for _, page := range s.storage {
 
     var jsonObject interface{}
     json.Unmarshal([]byte(page), &jsonObject)
@@ -121,7 +121,8 @@ func (s *Store) Delete(document string) {
 
     if CheckIfPageContainsDoc(pg, doc) {
       fmt.Println("DELETE |  ", document, " matches the page ", page, " so deleting it\n")
-      s.storage = append(s.storage[:i], s.storage[i+1:]...)
+    } else {
+        fmt.Println("DELETE |  ", document, "doesnt matches the page ", page, " \n")
     }
   }
     fmt.Println("-------------------------------------------")
@@ -160,13 +161,17 @@ func (s *Store) Get(document string, results *[]string) {
 
 }
 
-func (s *Store) Process(queries *Queue) {
+func (s *Store) Process(queries *Queue) []string {
 //  fmt.Println("queries.data: ", queries.data)
+  final_res := []string{}
   for _,query := range queries.data {
     res := []string{}
     s.Exec(query, &res)
+    final_res = append(final_res, res...)
   }
+  return final_res
 }
+
 /*******************************************
 helper functions
 *********************************************/
@@ -492,7 +497,7 @@ func CheckIfArrContainsDoc(pg []interface{}, doc map[string]interface{}) (flag b
 func main() {
   datastore := &Store{[]string{}}
   queries := NewQueries()
-  datastore.Process(queries)
+  res := datastore.Process(queries)
   fmt.Println("\n")
   for _, value := range datastore.storage {
       fmt.Println("STORAGE: ", value)
@@ -502,7 +507,7 @@ func main() {
       fmt.Println("QUERIES: ", value)
   }
 
-
+  fmt.Println("FINAL RESULTS | ", res)
 
 
 
