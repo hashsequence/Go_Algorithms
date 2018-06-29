@@ -219,7 +219,7 @@ fmt.Println("GET | page: ", pg, "\n")
    if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind(){
      flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
-       fmt.Println("comparing ", doc_value, " and ", pg[doc_key])
+       fmt.Println("CHECKIFPAGECONTAINSDOC | comparing ", doc_value, " and ", pg[doc_key])
          if !reflect.DeepEqual(pg[doc_key], doc_value) {
            flag = false
            break
@@ -227,7 +227,7 @@ fmt.Println("GET | page: ", pg, "\n")
           fmt.Println("", doc_value, " and ", pg[doc_key], " are equal")
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Map {
       // if reflect.TypeOf(doc_value).Kind() == reflect.Map {
-         fmt.Println("comparing ", doc_value.(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
+         fmt.Println("CHECKIFPAGECONTAINSDOC |comparing ", doc_value.(map[string]interface{}), " and ", pg[doc_key].(map[string]interface{}))
          /*
             if reflect.DeepEqual(pg[doc_key].(map[string]interface{}),doc_value.(map[string]interface{})) {
               flag = false
@@ -237,13 +237,13 @@ fmt.Println("GET | page: ", pg, "\n")
 
          if !IsSubObj(pg[doc_key].(map[string]interface{}), doc_value.(map[string]interface{})) {
            flag = false
-           return
+           break
          }
 
        //}
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
        //if reflect.TypeOf(doc_value).Kind() == reflect.Slice {
-          fmt.Println("comparing ", doc_value.([]interface{}), " and ", pg[doc_key].([]interface{}))
+          fmt.Println("CHECKIFPAGECONTAINSDOC | comparing ", doc_value.([]interface{}), " and ", pg[doc_key].([]interface{}))
           /*
          if !reflect.DeepEqual(pg[doc_key].([]interface{}),doc_value.([]interface{})) {
            flag = false
@@ -252,7 +252,7 @@ fmt.Println("GET | page: ", pg, "\n")
          */
          if !ArrHasSameValues(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
-           return
+           break
          }
 
       // }
@@ -269,7 +269,6 @@ fmt.Println("GET | page: ", pg, "\n")
          fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for |", sub_page , " and ", document )
          if !CheckIfPageContainsDoc(sub_page, document) {
            flag = false
-           break OuterLoop
          } else {
            flag = true
            break OuterLoop
@@ -290,8 +289,6 @@ fmt.Println("GET | page: ", pg, "\n")
             break OuterLoop
           }
         }
-        break OuterLoop
-
        }
      }
    }
@@ -316,7 +313,7 @@ func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
  //check if page contain all the key value pairs of the doc
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind() {
-       fmt.Println("IsSubObj in MATCH| comparing ", doc, " and ", pg)
+       fmt.Println("ISSUBOBJ | in MATCH| comparing ", doc, " and ", pg)
      flag = true
      if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Bool || reflect.TypeOf(pg[doc_key]).Kind() == reflect.Float64 || reflect.TypeOf(pg[doc_key]).Kind() == reflect.String {
        if pg[doc_key] != doc_value {
@@ -337,7 +334,7 @@ func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
        flag = false
      }
    } else {
-          fmt.Println("IsSubObj in NOT MATCH| comparing ", doc, " and ", pg)
+          fmt.Println("ISSOBOB | in NOT MATCH| comparing ", doc, " and ", pg)
      flag =  false
    }
  }

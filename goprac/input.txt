@@ -1,4 +1,4 @@
-add { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+add { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
 add { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
 get { "fruits" : ["apple", "peach", "orange"] }
 get { "fruits" : ["apple",  "orange", "peach"] }
@@ -13,3 +13,6 @@ get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag"
 get { "lastName" : "Doe"}
 add {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
 get {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
+get {"team" : ["red", "blue", "n"]}
+get {"team" : ["red", "blue"]}
+get {"team" : ["red", "blue", "yellow"]}
