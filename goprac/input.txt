@@ -17,6 +17,10 @@ get {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
 get {"team" : ["red", "blue", "n"]}
 get {"team" : ["red", "blue"]}
 get {"team" : ["red", "blue", "yellow"]}
-add {"layer1" :["demons","angels",["devil", {"layer2" : "god"}]]}
+add {"layer1" :["demons","angels",["devil", {"layer2" : "god", "layer3" : ["buddha" ,"asura"]}]]}
 get {"layer2" : "god"}
 get {"layer2" : "gog"}
+get {"layer3" : ["asura", "buddha"]}
+get {"layer3" : ["asura"]}
+get {"layer3" : ["buddha"]}
+get {"layer3" : [",asural"]}
