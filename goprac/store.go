@@ -267,7 +267,7 @@ fmt.Println("GET | page: ", pg, "\n")
       //   _, _ = strconv.Unquote(sub_page)
         //fmt.Println("CHECKIFPAGECONTAINSDOC | error: ",err)
          fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | sub_page: ", pg_value)
-         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for |", sub_page , " and ", document )
+         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage: ", sub_page , " for  ", document )
          if !CheckIfPageContainsDoc(sub_page, document) {
            flag = false
          } else {
