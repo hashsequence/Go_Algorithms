@@ -11,8 +11,12 @@ get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag"
 get { "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}
 get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }
 get { "lastName" : "Doe"}
+get { "lastName" : "Doge"}
 add {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
 get {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
 get {"team" : ["red", "blue", "n"]}
 get {"team" : ["red", "blue"]}
 get {"team" : ["red", "blue", "yellow"]}
+add {"layer1" :["demons","angels",["devil", {"layer2" : "god"}]]}
+get {"layer2" : "god"}
+get {"layer2" : "gog"}

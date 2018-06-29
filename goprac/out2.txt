@@ -1,0 +1,807 @@
+-------------------------------------------
+ADD | Document:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" } 
+
+-------------------------------------------
+-------------------------------------------
+ADD | Document:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]} 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "fruits" : ["apple", "peach", "orange"] }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[fruits:[apple peach orange]] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [apple peach orange]  and  [apple peach orange]
+ARRHASSAMEVALUE | comparing [apple peach orange]  and  [apple peach orange]
+{ "fruits" : ["apple", "peach", "orange"] }  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "fruits" : ["apple", "peach", "orange"] }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[fruits:[apple peach orange]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[lastName:Green age:27 firstName:Sally] map[age:41 firstName:Jim lastName:Galley]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[fruits:[apple peach orange]]
+GET | document:  map[fruits:[apple peach orange]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[fruits:[apple peach orange]]
+GET | document:  map[fruits:[apple peach orange]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[fruits:[apple peach orange]]
+GET | document:  map[fruits:[apple peach orange]] 
+
+GET | page:  map[lastName:Green age:27 firstName:Sally] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[fruits:[apple peach orange]]
+GET | document:  map[fruits:[apple peach orange]] 
+
+GET | page:  map[lastName:Galley age:41 firstName:Jim] 
+
+{ "fruits" : ["apple", "peach", "orange"] }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "fruits" : ["apple", "peach", "orange"] }  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "fruits" : ["apple",  "orange", "peach"] }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[fruits:[apple orange peach]] 
+
+GET | page:  map[meat:beef fruits:[apple peach orange] vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]]] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [apple orange peach]  and  [apple peach orange]
+ARRHASSAMEVALUE | comparing [apple peach orange]  and  [apple orange peach]
+{ "fruits" : ["apple",  "orange", "peach"] }  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "fruits" : ["apple",  "orange", "peach"] }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[fruits:[apple orange peach]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[fruits:[apple orange peach]]
+GET | document:  map[fruits:[apple orange peach]] 
+
+GET | page:  map[lastName:Doe age:23 firstName:John] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[fruits:[apple orange peach]]
+GET | document:  map[fruits:[apple orange peach]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[fruits:[apple orange peach]]
+GET | document:  map[fruits:[apple orange peach]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[fruits:[apple orange peach]]
+GET | document:  map[fruits:[apple orange peach]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{ "fruits" : ["apple",  "orange", "peach"] }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "fruits" : ["apple",  "orange", "peach"] }  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "fruits" : ["apple",  "lime", "peach"] }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[fruits:[apple lime peach]] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[flag1:false fake1:bell peppers]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [apple lime peach]  and  [apple peach orange]
+ARRHASSAMEVALUE | comparing [apple peach orange]  and  [apple lime peach]
+{ "fruits" : ["apple",  "lime", "peach"] }  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "fruits" : ["apple",  "lime", "peach"] }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[fruits:[apple lime peach]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[lastName:Smith age:32 firstName:Mary]] sales:[map[age:27 firstName:Sally lastName:Green] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[fruits:[apple lime peach]]
+GET | document:  map[fruits:[apple lime peach]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[fruits:[apple lime peach]]
+GET | document:  map[fruits:[apple lime peach]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[fruits:[apple lime peach]]
+GET | document:  map[fruits:[apple lime peach]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[fruits:[apple lime peach]]
+GET | document:  map[fruits:[apple lime peach]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{ "fruits" : ["apple",  "lime", "peach"] }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "fruits" : ["apple",  "lime", "peach"] }  | results:  [] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "fruits" : ["apple",  "peach"] }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[fruits:[apple peach]] 
+
+GET | page:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]] meat:beef fruits:[apple peach orange]] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [apple peach]  and  [apple peach orange]
+ARRHASSAMEVALUE | comparing [apple peach orange]  and  [apple peach]
+{ "fruits" : ["apple",  "peach"] }  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "fruits" : ["apple",  "peach"] }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[fruits:[apple peach]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[fruits:[apple peach]]
+GET | document:  map[fruits:[apple peach]] 
+
+GET | page:  map[lastName:Doe age:23 firstName:John] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[fruits:[apple peach]]
+GET | document:  map[fruits:[apple peach]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[fruits:[apple peach]]
+GET | document:  map[fruits:[apple peach]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[fruits:[apple peach]]
+GET | document:  map[fruits:[apple peach]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{ "fruits" : ["apple",  "peach"] }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "fruits" : ["apple",  "peach"] }  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "fruits" : ["apple",  "orange", "peach", "banana"] }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[fruits:[apple orange peach banana]] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[fake:map[fake1:bell peppers flag1:false] real:map[team:[red yellow blue] real1:spinach real2:carrot flag:true]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [apple orange peach banana]  and  [apple peach orange]
+ARRHASSAMEVALUE | comparing [apple peach orange]  and  [apple orange peach banana]
+{ "fruits" : ["apple",  "orange", "peach", "banana"] }  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "fruits" : ["apple",  "orange", "peach", "banana"] }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[fruits:[apple orange peach banana]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[fruits:[apple orange peach banana]]
+GET | document:  map[fruits:[apple orange peach banana]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[fruits:[apple orange peach banana]]
+GET | document:  map[fruits:[apple orange peach banana]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[fruits:[apple orange peach banana]]
+GET | document:  map[fruits:[apple orange peach banana]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[fruits:[apple orange peach banana]]
+GET | document:  map[fruits:[apple orange peach banana]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{ "fruits" : ["apple",  "orange", "peach", "banana"] }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "fruits" : ["apple",  "orange", "peach", "banana"] }  | results:  [] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "fruits" : ["apple",  "orange", "peach", "apple"] }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[fruits:[apple orange peach apple]] 
+
+GET | page:  map[vegetables:map[real:map[flag:true team:[red yellow blue] real1:spinach real2:carrot] fake:map[fake1:bell peppers flag1:false]] meat:beef fruits:[apple peach orange]] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [apple orange peach apple]  and  [apple peach orange]
+ARRHASSAMEVALUE | comparing [apple peach orange]  and  [apple orange peach apple]
+{ "fruits" : ["apple",  "orange", "peach", "apple"] }  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "fruits" : ["apple",  "orange", "peach", "apple"] }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[fruits:[apple orange peach apple]] 
+
+GET | page:  map[sales:[map[firstName:Sally lastName:Green age:27] map[age:41 firstName:Jim lastName:Galley]] accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[fruits:[apple orange peach apple]]
+GET | document:  map[fruits:[apple orange peach apple]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[fruits:[apple orange peach apple]]
+GET | document:  map[fruits:[apple orange peach apple]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[fruits:[apple orange peach apple]]
+GET | document:  map[fruits:[apple orange peach apple]] 
+
+GET | page:  map[age:27 firstName:Sally lastName:Green] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[fruits:[apple orange peach apple]]
+GET | document:  map[fruits:[apple orange peach apple]] 
+
+GET | page:  map[lastName:Galley age:41 firstName:Jim] 
+
+{ "fruits" : ["apple",  "orange", "peach", "apple"] }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "fruits" : ["apple",  "orange", "peach", "apple"] }  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "meat" : "beef"}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[meat:beef] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC | comparing  beef  and  beef
+ beef  and  beef  are equal
+{ "meat" : "beef"}  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "meat" : "beef"}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[meat:beef] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[meat:beef]
+GET | document:  map[meat:beef] 
+
+GET | page:  map[lastName:Doe age:23 firstName:John] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[meat:beef]
+GET | document:  map[meat:beef] 
+
+GET | page:  map[age:32 firstName:Mary lastName:Smith] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[meat:beef]
+GET | document:  map[meat:beef] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[meat:beef]
+GET | document:  map[meat:beef] 
+
+GET | page:  map[lastName:Galley age:41 firstName:Jim] 
+
+{ "meat" : "beef"}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "meat" : "beef"}  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]] 
+
+GET | page:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]] meat:beef fruits:[apple peach orange]] 
+
+CHECKIFPAGECONTAINSDOC |comparing  map[real:map[real1:spinach real2:carrot flag:true]]  and  map[real:map[team:[red yellow blue] real1:spinach real2:carrot flag:true] fake:map[flag1:false fake1:bell peppers]]
+ISSUBOBJ | in MATCH| comparing  map[real:map[real2:carrot flag:true real1:spinach]]  and  map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]]
+ISSUBOBJ | in MATCH| comparing  map[flag:true real1:spinach real2:carrot]  and  map[real1:spinach real2:carrot flag:true team:[red yellow blue]]
+ISSUBOBJ | in MATCH| comparing  map[real1:spinach real2:carrot flag:true]  and  map[real1:spinach real2:carrot flag:true team:[red yellow blue]]
+ISSUBOBJ | in MATCH| comparing  map[real1:spinach real2:carrot flag:true]  and  map[real2:carrot flag:true team:[red yellow blue] real1:spinach]
+{ "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[lastName:Green age:27 firstName:Sally] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]]
+GET | document:  map[vegetables:map[real:map[flag:true real1:spinach real2:carrot]]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]]
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]] 
+
+GET | page:  map[age:32 firstName:Mary lastName:Smith] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]]
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true]]]
+GET | document:  map[vegetables:map[real:map[flag:true real1:spinach real2:carrot]]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{ "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[fake:map[fake1:bell peppers flag1:false] real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC |comparing  map[fake:map[fake1:bell peppers flag1:false]]  and  map[fake:map[fake1:bell peppers flag1:false] real:map[team:[red yellow blue] real1:spinach real2:carrot flag:true]]
+ISSUBOBJ | in MATCH| comparing  map[fake:map[flag1:false fake1:bell peppers]]  and  map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]]
+ISSUBOBJ | in MATCH| comparing  map[fake1:bell peppers flag1:false]  and  map[fake1:bell peppers flag1:false]
+ISSUBOBJ | in MATCH| comparing  map[fake1:bell peppers flag1:false]  and  map[flag1:false fake1:bell peppers]
+{ "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[accounting:[map[age:23 firstName:John lastName:Doe] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[lastName:Galley age:41 firstName:Jim]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[lastName:Galley age:41 firstName:Jim] 
+
+{ "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[vegetables:map[real:map[real2:carrot flag:true real1:spinach] fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[real:map[flag:true team:[red yellow blue] real1:spinach real2:carrot] fake:map[fake1:bell peppers flag1:false]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC |comparing  map[real:map[real2:carrot flag:true real1:spinach] fake:map[fake1:bell peppers flag1:false]]  and  map[real:map[real2:carrot flag:true team:[red yellow blue] real1:spinach] fake:map[fake1:bell peppers flag1:false]]
+ISSUBOBJ | in MATCH| comparing  map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]  and  map[real:map[team:[red yellow blue] real1:spinach real2:carrot flag:true] fake:map[flag1:false fake1:bell peppers]]
+ISSUBOBJ | in MATCH| comparing  map[real1:spinach real2:carrot flag:true]  and  map[real2:carrot flag:true team:[red yellow blue] real1:spinach]
+ISSUBOBJ | in MATCH| comparing  map[real1:spinach real2:carrot flag:true]  and  map[flag:true team:[red yellow blue] real1:spinach real2:carrot]
+ISSUBOBJ | in MATCH| comparing  map[real1:spinach real2:carrot flag:true]  and  map[real2:carrot flag:true team:[red yellow blue] real1:spinach]
+ISSUBOBJ | in MATCH| comparing  map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]  and  map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]]
+ISSUBOBJ | in MATCH| comparing  map[fake1:bell peppers flag1:false]  and  map[flag1:false fake1:bell peppers]
+ISSUBOBJ | in MATCH| comparing  map[fake1:bell peppers flag1:false]  and  map[fake1:bell peppers flag1:false]
+{ "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }  is in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[vegetables:map[fake:map[fake1:bell peppers flag1:false] real:map[real1:spinach real2:carrot flag:true]]]
+GET | document:  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true] fake:map[flag1:false fake1:bell peppers]]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false] real:map[flag:true real1:spinach real2:carrot]]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[vegetables:map[real:map[real1:spinach real2:carrot flag:true] fake:map[fake1:bell peppers flag1:false]]]
+GET | document:  map[vegetables:map[fake:map[fake1:bell peppers flag1:false] real:map[real1:spinach real2:carrot flag:true]]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{ "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }  | results:  [{ "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  { "lastName" : "Doe"}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[lastName:Doe] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[real:map[real2:carrot flag:true team:[red yellow blue] real1:spinach] fake:map[fake1:bell peppers flag1:false]] meat:beef] 
+
+CHECKIFPAGECONTAINSDOC | MAP | sub_page:  map[real:map[flag:true team:[red yellow blue] real1:spinach real2:carrot] fake:map[fake1:bell peppers flag1:false]]
+CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for | map[fake:map[fake1:bell peppers flag1:false] real:map[flag:true team:[red yellow blue] real1:spinach real2:carrot]]  and  map[lastName:Doe]
+GET | document:  map[lastName:Doe] 
+
+GET | page:  map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]] 
+
+CHECKIFPAGECONTAINSDOC | MAP | sub_page:  map[real1:spinach real2:carrot flag:true team:[red yellow blue]]
+CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for | map[team:[red yellow blue] real1:spinach real2:carrot flag:true]  and  map[lastName:Doe]
+GET | document:  map[lastName:Doe] 
+
+GET | page:  map[real1:spinach real2:carrot flag:true team:[red yellow blue]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "red"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "red"  and  map[lastName:Doe]
+CHECKIFPAGECONTAINSDOC | MAP | sub_page:  map[fake1:bell peppers flag1:false]
+CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for | map[fake1:bell peppers flag1:false]  and  map[lastName:Doe]
+GET | document:  map[lastName:Doe] 
+
+GET | page:  map[fake1:bell peppers flag1:false] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "apple"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "apple"  and  map[lastName:Doe]
+{ "lastName" : "Doe"}  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  { "lastName" : "Doe"}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[lastName:Doe] 
+
+GET | page:  map[accounting:[map[age:23 firstName:John lastName:Doe] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[lastName:Doe]
+GET | document:  map[lastName:Doe] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSDOC | comparing  Doe  and  Doe
+ Doe  and  Doe  are equal
+{ "lastName" : "Doe"}  is in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+
+GET | FINAL RESULTS | doc:  { "lastName" : "Doe"}  | results:  [{ "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}] 
+
+-------------------------------------------
+-------------------------------------------
+ADD | Document:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]} 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[meat:beef fruits:[apple peach orange] vegetables:map[real:map[real2:carrot flag:true team:[red yellow blue] real1:spinach] fake:map[fake1:bell peppers flag1:false]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "apple"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "apple"  and  map[foods:[map[fruits:[lemons apricots jack fruits]]]]
+{"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[foods:[map[fruits:[lemons apricots jack fruits]]]]
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[foods:[map[fruits:[lemons apricots jack fruits]]]]
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[age:32 firstName:Mary lastName:Smith] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[foods:[map[fruits:[lemons apricots jack fruits]]]]
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[age:27 firstName:Sally lastName:Green] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[foods:[map[fruits:[lemons apricots jack fruits]]]]
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | DOCUMENT:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
+GET | PAGE:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+GET | document:  map[foods:[map[fruits:[lemons apricots jack fruits]]]] 
+
+GET | page:  map[foods:[map[fruits:[lemons apricots jack fruits]] map[vegetables:[bok choy asparagus onions lettuce]]]] 
+
+CHECKIFPAGECONTAINSDOC | comparing  [map[fruits:[lemons apricots jack fruits]]]  and  [map[fruits:[lemons apricots jack fruits]] map[vegetables:[bok choy asparagus onions lettuce]]]
+ARRHASSAMEVALUE | comparing [map[fruits:[lemons apricots jack fruits]] map[vegetables:[bok choy asparagus onions lettuce]]]  and  [map[fruits:[lemons apricots jack fruits]]]
+ISSUBOBJ | in MATCH| comparing  map[fruits:[lemons apricots jack fruits]]  and  map[fruits:[lemons apricots jack fruits]]
+ARRHASSAMEVALUE | comparing [lemons apricots jack fruits]  and  [lemons apricots jack fruits]
+{"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}  is in  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+
+GET | FINAL RESULTS | doc:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}  | results:  [{"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  {"team" : ["red", "blue", "n"]}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[meat:beef fruits:[apple peach orange] vegetables:map[real:map[real2:carrot flag:true team:[red yellow blue] real1:spinach] fake:map[fake1:bell peppers flag1:false]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "apple"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "apple"  and  map[team:[red blue n]]
+{"team" : ["red", "blue", "n"]}  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  {"team" : ["red", "blue", "n"]}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[team:[red blue n]]
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[team:[red blue n]]
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[team:[red blue n]]
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[age:27 firstName:Sally lastName:Green] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[team:[red blue n]]
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[lastName:Galley age:41 firstName:Jim] 
+
+{"team" : ["red", "blue", "n"]}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | DOCUMENT:  {"team" : ["red", "blue", "n"]}
+GET | PAGE:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[foods:[map[fruits:[lemons apricots jack fruits]] map[vegetables:[bok choy asparagus onions lettuce]]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"fruits":["lemons","apricots","jack fruits"]}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"fruits":["lemons","apricots","jack fruits"]}  and  map[team:[red blue n]]
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[fruits:[lemons apricots jack fruits]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "lemons"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "lemons"  and  map[team:[red blue n]]
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"vegetables":["bok choy","asparagus","onions","lettuce"]}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"vegetables":["bok choy","asparagus","onions","lettuce"]}  and  map[team:[red blue n]]
+GET | document:  map[team:[red blue n]] 
+
+GET | page:  map[vegetables:[bok choy asparagus onions lettuce]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "bok choy"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "bok choy"  and  map[team:[red blue n]]
+{"team" : ["red", "blue", "n"]}  is not in  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+
+GET | FINAL RESULTS | doc:  {"team" : ["red", "blue", "n"]}  | results:  [] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  {"team" : ["red", "blue"]}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[fruits:[apple peach orange] vegetables:map[fake:map[fake1:bell peppers flag1:false] real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]]] meat:beef] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "apple"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "apple"  and  map[team:[red blue]]
+{"team" : ["red", "blue"]}  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  {"team" : ["red", "blue"]}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[lastName:Green age:27 firstName:Sally] map[age:41 firstName:Jim lastName:Galley]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[team:[red blue]]
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[firstName:John lastName:Doe age:23] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[team:[red blue]]
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[firstName:Mary lastName:Smith age:32] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[team:[red blue]]
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[team:[red blue]]
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{"team" : ["red", "blue"]}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | DOCUMENT:  {"team" : ["red", "blue"]}
+GET | PAGE:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[foods:[map[fruits:[lemons apricots jack fruits]] map[vegetables:[bok choy asparagus onions lettuce]]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"fruits":["lemons","apricots","jack fruits"]}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"fruits":["lemons","apricots","jack fruits"]}  and  map[team:[red blue]]
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[fruits:[lemons apricots jack fruits]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "lemons"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "lemons"  and  map[team:[red blue]]
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"vegetables":["bok choy","asparagus","onions","lettuce"]}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"vegetables":["bok choy","asparagus","onions","lettuce"]}  and  map[team:[red blue]]
+GET | document:  map[team:[red blue]] 
+
+GET | page:  map[vegetables:[bok choy asparagus onions lettuce]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "bok choy"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "bok choy"  and  map[team:[red blue]]
+{"team" : ["red", "blue"]}  is not in  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+
+GET | FINAL RESULTS | doc:  {"team" : ["red", "blue"]}  | results:  [] 
+
+-------------------------------------------
+-------------------------------------------
+GET | DOCUMENT:  {"team" : ["red", "blue", "yellow"]}
+GET | PAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[meat:beef fruits:[apple peach orange] vegetables:map[real:map[real1:spinach real2:carrot flag:true team:[red yellow blue]] fake:map[fake1:bell peppers flag1:false]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "apple"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "apple"  and  map[team:[red blue yellow]]
+{"team" : ["red", "blue", "yellow"]}  is not in  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+GET | DOCUMENT:  {"team" : ["red", "blue", "yellow"]}
+GET | PAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[accounting:[map[firstName:John lastName:Doe age:23] map[firstName:Mary lastName:Smith age:32]] sales:[map[firstName:Sally lastName:Green age:27] map[firstName:Jim lastName:Galley age:41]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":23,"firstName":"John","lastName":"Doe"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":23,"firstName":"John","lastName":"Doe"}  and  map[team:[red blue yellow]]
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[lastName:Doe age:23 firstName:John] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":32,"firstName":"Mary","lastName":"Smith"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":32,"firstName":"Mary","lastName":"Smith"}  and  map[team:[red blue yellow]]
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[lastName:Smith age:32 firstName:Mary] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":27,"firstName":"Sally","lastName":"Green"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":27,"firstName":"Sally","lastName":"Green"}  and  map[team:[red blue yellow]]
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[firstName:Sally lastName:Green age:27] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"age":41,"firstName":"Jim","lastName":"Galley"}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"age":41,"firstName":"Jim","lastName":"Galley"}  and  map[team:[red blue yellow]]
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[firstName:Jim lastName:Galley age:41] 
+
+{"team" : ["red", "blue", "yellow"]}  is not in  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+GET | DOCUMENT:  {"team" : ["red", "blue", "yellow"]}
+GET | PAGE:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[foods:[map[fruits:[lemons apricots jack fruits]] map[vegetables:[bok choy asparagus onions lettuce]]]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"fruits":["lemons","apricots","jack fruits"]}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"fruits":["lemons","apricots","jack fruits"]}  and  map[team:[red blue yellow]]
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[fruits:[lemons apricots jack fruits]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "lemons"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "lemons"  and  map[team:[red blue yellow]]
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page {"vegetables":["bok choy","asparagus","onions","lettuce"]}
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | {"vegetables":["bok choy","asparagus","onions","lettuce"]}  and  map[team:[red blue yellow]]
+GET | document:  map[team:[red blue yellow]] 
+
+GET | page:  map[vegetables:[bok choy asparagus onions lettuce]] 
+
+CHECKIFPAGECONTAINSFDOC | SLICE | sub_page "bok choy"
+CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for | "bok choy"  and  map[team:[red blue yellow]]
+{"team" : ["red", "blue", "yellow"]}  is not in  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+
+GET | FINAL RESULTS | doc:  {"team" : ["red", "blue", "yellow"]}  | results:  [] 
+
+-------------------------------------------
+
+
+STORAGE:  { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+STORAGE:  { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+STORAGE:  {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+
+
+QUERIES:  add { "fruits" : ["apple", "peach", "orange"], "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true, "team" : ["red", "yellow", "blue"] }, "fake" : {"fake1" : "bell peppers", "flag1" : false}}, "meat" : "beef" }
+QUERIES:  add { "accounting" : [{ "firstName" : "John",  "lastName"  : "Doe", "age": 23 },{ "firstName" : "Mary",  "lastName"  : "Smith",  "age" : 32 }],  "sales" : [{ "firstName" : "Sally", "lastName"  : "Green","age" : 27 },{ "firstName" : "Jim", "lastName"  : "Galley", "age" : 41 }]}
+QUERIES:  get { "fruits" : ["apple", "peach", "orange"] }
+QUERIES:  get { "fruits" : ["apple",  "orange", "peach"] }
+QUERIES:  get { "fruits" : ["apple",  "lime", "peach"] }
+QUERIES:  get { "fruits" : ["apple",  "peach"] }
+QUERIES:  get { "fruits" : ["apple",  "orange", "peach", "banana"] }
+QUERIES:  get { "fruits" : ["apple",  "orange", "peach", "apple"] }
+QUERIES:  get { "meat" : "beef"}
+QUERIES:  get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }}}
+QUERIES:  get { "vegetables" : { "fake" : {"fake1" : "bell peppers", "flag1" : false}}}
+QUERIES:  get { "vegetables" : { "real" : {"real1" : "spinach", "real2" : "carrot", "flag" : true }, "fake" : {"fake1" : "bell peppers", "flag1" : false}} }
+QUERIES:  get { "lastName" : "Doe"}
+QUERIES:  add {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}, {"vegetables" : ["bok choy", "asparagus", "onions", "lettuce"]}]}
+QUERIES:  get {"foods" : [{"fruits": ["lemons", "apricots", "jack fruits"]}]}
+QUERIES:  get {"team" : ["red", "blue", "n"]}
+QUERIES:  get {"team" : ["red", "blue"]}
+QUERIES:  get {"team" : ["red", "blue", "yellow"]}
