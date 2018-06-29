@@ -291,7 +291,7 @@ fmt.Println("GET | page: ", pg, "\n")
             }
           } else if reflect.TypeOf(sub_pg_value).Kind() == reflect.Slice {
             fmt.Println("CHECKIFPAGECONTAINSFDOC | SLICE | checking if doc is in sub page array: ", sub_page)
-            if !IsDocInArr(sub_pg_value.([]interface{}), doc) {
+            if !CheckIfArrContainsDoc(sub_pg_value.([]interface{}), doc) {
               flag = false
             } else {
               flag = true
@@ -439,14 +439,14 @@ func Contains(s []interface{}, e interface{}) bool {
 IsDocInArr : checks for the doc in the array
 */
 
-func IsDocInArr(pg []interface{}, doc map[string]interface{}) (flag bool) {
+func CheckIfArrContainsDoc(pg []interface{}, doc map[string]interface{}) (flag bool) {
   defer  func() bool { if p := recover(); p != nil {
         fmt.Errorf("Get paniced!!")
           return false
       }
       return flag
     }()
-  fmt.Println("ISDOCINARR | checking the array: ",pg, " for: ", doc)
+  fmt.Println("CHECKIFARRCONTAINSDOC | checking the array: ",pg, " for: ", doc)
   for _, pg_value := range pg {
     if reflect.TypeOf(pg_value).Kind() == reflect.Map {
       pg_byte, _ := json.Marshal(pg_value)
@@ -460,7 +460,7 @@ func IsDocInArr(pg []interface{}, doc map[string]interface{}) (flag bool) {
         break
       }
     } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
-      if !IsDocInArr(pg_value.([]interface{}), doc) {
+      if !CheckIfArrContainsDoc(pg_value.([]interface{}), doc) {
         flag = false
       } else {
         flag = true

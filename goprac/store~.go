@@ -107,15 +107,9 @@ func (s *Store) Add(document string) {
 
 func (s *Store) Delete(document string) {
     fmt.Println("-------------------------------------------")
-      var jsonObject2 interface{}
-      json.Unmarshal([]byte(document), &jsonObject2)
-      doc := jsonObject2.(map[string]interface{})
     fmt.Println("DELETE | Document: ", document, "\n")
   for i, page := range s.storage {
-    var jsonObject interface{}
-    json.Unmarshal([]byte(page), &jsonObject)
-    pg := jsonObject.(map[string]interface{})
-    if CheckIfPageContainsDoc(pg, doc) {
+    if CheckIfPageContainsDoc(page, document) {
       fmt.Println("DELETE |  ", document, " matches the page ", page, " so deleting it\n")
       s.storage = append(s.storage[:i], s.storage[i+1:]...)
     }
@@ -129,20 +123,11 @@ func (s *Store) Get(document string, results *[]string) {
     }
   }()
     fmt.Println("-------------------------------------------")
-  var jsonObject2 interface{}
-  json.Unmarshal([]byte(document), &jsonObject2)
-  doc := jsonObject2.(map[string]interface{})
-
   for _, page := range s.storage {
   fmt.Println("GET | DOCUMENT: ", document)
    fmt.Println("GET | PAGE: ", page)
-   var jsonObject interface{}
-   //json.Unmarshal(pg_byte, &jsonObject)
-   //json.Unmarshal(doc_byte, &jsonObject2)
-   json.Unmarshal([]byte(page), &jsonObject)
-   pg := jsonObject.(map[string]interface{})
 
-    if CheckIfPageContainsDoc(pg, doc) {
+    if CheckIfPageContainsDoc(page, document) {
         *results = append (*results, page)
         fmt.Println(document, " is in ", page)
     } else {
@@ -195,7 +180,7 @@ CheckIfPageContainsDoc : check if the document is within the page of the storage
 
 
 
-func CheckIfPageContainsDoc(pg, doc map[string]interface{}) (flag bool) {
+func CheckIfPageContainsDoc(page, document string) (flag bool) {
   /*
   bool, for JSON booleans
   float64, for JSON numbers
@@ -212,14 +197,14 @@ defer  func() { if p := recover(); p != nil {
 }()
   //pg_byte, _ := json.Marshal(page)
 //  doc_byte, _ := json.Marshal(document)
-  //var jsonObject interface{}
-  //var jsonObject2 interface{}
+  var jsonObject interface{}
+  var jsonObject2 interface{}
   //json.Unmarshal(pg_byte, &jsonObject)
   //json.Unmarshal(doc_byte, &jsonObject2)
-  //json.Unmarshal([]byte(page), &jsonObject)
-  //json.Unmarshal([]byte(document), &jsonObject2)
-  //pg := jsonObject.(map[string]interface{})
-  //doc := jsonObject2.(map[string]interface{})
+  json.Unmarshal([]byte(page), &jsonObject)
+  json.Unmarshal([]byte(document), &jsonObject2)
+  pg := jsonObject.(map[string]interface{})
+  doc := jsonObject2.(map[string]interface{})
 //  pg_str :=  fmt.Sprintf("%s",pg_byte)
   //doc_str := fmt.Sprintf("%s", doc_byte)
   //pg_str, _ = strconv.Unquote(pg_str)
@@ -276,14 +261,14 @@ fmt.Println("GET | page: ", pg, "\n")
    } else {
      for _, pg_value := range pg {
        if reflect.TypeOf(pg_value).Kind() == reflect.Map{
-         flag = true
-         //pg_byte, _ := json.Marshal(pg_value)
-         //sub_page :=  fmt.Sprintf("%s",pg_byte)
+         flag = false
+         pg_byte, _ := json.Marshal(pg_value)
+         sub_page :=  fmt.Sprintf("%s",pg_byte)
       //   _, _ = strconv.Unquote(sub_page)
         //fmt.Println("CHECKIFPAGECONTAINSDOC | error: ",err)
          fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | sub_page: ", pg_value)
-         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for |", pg_value , " and ", doc )
-         if !CheckIfPageContainsDoc(pg_value.(map[string]interface{}), doc) {
+         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage for |", sub_page , " and ", document )
+         if !CheckIfPageContainsDoc(sub_page, document) {
            flag = false
          } else {
            flag = true
@@ -291,18 +276,27 @@ fmt.Println("GET | page: ", pg, "\n")
          }
 
        } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
-         flag = true
+         flag = false
         // _, _ = strconv.Unquote(sub_page)
         for _, sub_pg_value := range pg_value.([]interface{}) {
           sub_pg_byte, _ := json.Marshal(sub_pg_value)
           sub_page :=  fmt.Sprintf("%s",sub_pg_byte)
-          fmt.Println("CHECKIFPAGECONTAINSFDOC | SLICE | sub_page", sub_page)
-          fmt.Println("CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage for |", sub_page , " and ", doc )
-          if !CheckIfPageContainsDoc(sub_pg_value.(map[string]interface{}), doc) {
-            flag = false
-          } else {
-            flag = true
-            break OuterLoop
+          fmt.Println("CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage: ", sub_page , " for: ", document )
+          if reflect.TypeOf(sub_pg_value).Kind() == reflect.Map {
+            if !CheckIfPageContainsDoc(sub_page, document) {
+              flag = false
+            } else {
+              flag = true
+              break OuterLoop
+            }
+          } else if reflect.TypeOf(sub_pg_value).Kind() == reflect.Slice {
+            fmt.Println("CHECKIFPAGECONTAINSFDOC | SLICE | checking if doc is in sub page array: ", sub_page)
+            if !CheckIfArrContainsDoc(sub_pg_value.([]interface{}), doc) {
+              flag = false
+            } else {
+              flag = true
+              break OuterLoop
+            }
           }
         }
        }
@@ -441,7 +435,41 @@ func Contains(s []interface{}, e interface{}) bool {
     return false
 }
 
+/*
+IsDocInArr : checks for the doc in the array
+*/
 
+func CheckIfArrContainsDoc(pg []interface{}, doc map[string]interface{}) (flag bool) {
+  defer  func() bool { if p := recover(); p != nil {
+        fmt.Errorf("Get paniced!!")
+          return false
+      }
+      return flag
+    }()
+  fmt.Println("CHECKIFARRCONTAINSDOC | checking the array: ",pg, " for: ", doc)
+  for _, pg_value := range pg {
+    if reflect.TypeOf(pg_value).Kind() == reflect.Map {
+      pg_byte, _ := json.Marshal(pg_value)
+      page :=  fmt.Sprintf("%s",pg_byte)
+      doc_byte, _ := json.Marshal(doc)
+      document :=  fmt.Sprintf("%s",doc_byte)
+      if !CheckIfPageContainsDoc(page, document) {
+        flag = false
+      } else {
+        flag = true
+        break
+      }
+    } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
+      if !CheckIfArrContainsDoc(pg_value.([]interface{}), doc) {
+        flag = false
+      } else {
+        flag = true
+        break
+      }
+    }
+  }
+  return
+}
 func main() {
   datastore := &Store{[]string{}}
   queries := NewQueries()
