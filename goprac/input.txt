@@ -21,9 +21,21 @@ add {"layer1" :["demons","angels",["devil", {"layer2" : "god", "layer3" : ["budd
 get {"layer2" : "god"}
 get {"layer2" : "gog"}
 get {"layer3" : ["asura", "buddha"]}
+get {"layer3" : ["asura", "buddha","god"]}
 get {"layer3" : ["asura"]}
 get {"layer3" : ["buddha"]}
-get {"layer3" : [",asural"]}
+get {"layer3" : ["asural"]}
 delete {"layer3" : ["buddhar"]}
 delete {"layer3" : ["buddha"]}
 delete {{"layer3" : ["buddha"]}}
+add {"layer1" :["demons","angels",["devil", {"layer2" : "god", "layer3" : ["buddha" ,"asura"]}], {"layer1" : "thor"}], "layer2" : [{"demon" : "lucifer"}, "monkeyking", {"layer1" : [{"giant" : "atreus"}, {"layer3" : ["kratos","odin"]}]}]}
+get {"layer3" : ["buddha"]}
+get {"layer3" : ["kratos"]}
+get {"layer3" : ["buddhar"]}
+get {"layer3" : ["kratos", "odin"]}
+get {"layer3" : ["kratos", "odin", "loki"]}
+get {"layer1" :["demons","angels",["devil", {"layer2" : "god", "layer3" : ["buddha" ,"asura"]}]]}
+get {"layer1" : {"giant" : "atreus"}}
+get {"layer1" : [{"giant" : "atreus"}]}
+get {"layer1" : "thor"}
+get {"layer1" : "thora"}

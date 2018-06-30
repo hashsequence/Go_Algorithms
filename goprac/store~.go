@@ -258,8 +258,6 @@ fmt.Println("GET | document: ", doc, "\n")
 fmt.Println("GET | page: ", pg, "\n")
 
   flag = false
-
-  OuterLoop:
   for doc_key, doc_value := range doc {
    if _, ok:= pg[doc_key]; ok && reflect.TypeOf(pg[doc_key]).Kind() == reflect.TypeOf(doc_value).Kind(){
      flag = true
@@ -295,56 +293,62 @@ fmt.Println("GET | page: ", pg, "\n")
            return
          }
          */
-         if !ArrHasSameValues(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+         if !IsSubArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
            break
          }
 
       // }
      }
-   } else {
-     for _, pg_value := range pg {
-       if reflect.TypeOf(pg_value).Kind() == reflect.Map{
-         flag = false
-         //pg_byte, _ := json.Marshal(pg_value)
-         //sub_page :=  fmt.Sprintf("%s",pg_byte)
-      //   _, _ = strconv.Unquote(sub_page)
-        //fmt.Println("CHECKIFPAGECONTAINSDOC | error: ",err)
-         fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage: ", pg_value , " for ", doc )
-         if !CheckIfPageContainsDoc(pg_value.(map[string]interface{}), doc) {
-           flag = false
-         } else {
-           flag = true
-           break OuterLoop
-         }
-
-       } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
-         flag = false
-        // _, _ = strconv.Unquote(sub_page)
-        for _, sub_pg_value := range pg_value.([]interface{}) {
-        //  sub_pg_byte, _ := json.Marshal(sub_pg_value)
-          //sub_page :=  fmt.Sprintf("%s",sub_pg_byte)
-          fmt.Println("CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage: ", sub_pg_value , " for: ", doc )
-          if reflect.TypeOf(sub_pg_value).Kind() == reflect.Map {
-            if !CheckIfPageContainsDoc(sub_pg_value.(map[string]interface{}), doc) {
-              flag = false
-            } else {
-              flag = true
-              break OuterLoop
-            }
-          } else if reflect.TypeOf(sub_pg_value).Kind() == reflect.Slice {
-            fmt.Println("CHECKIFPAGECONTAINSFDOC | SLICE | checking if doc is in sub page array: ", sub_pg_value)
-            if !CheckIfArrContainsDoc(sub_pg_value.([]interface{}), doc) {
-              flag = false
-            } else {
-              flag = true
-              break OuterLoop
-            }
-          }
-        }
-       }
-     }
    }
+  }
+  // if the document cannot be found in the current level
+  // then we must dive deeper into the nested objects and arrays
+  //to find the matching keys
+
+  if flag == false {
+    OuterLoop:
+    for _, pg_value := range pg {
+      if reflect.TypeOf(pg_value).Kind() == reflect.Map{
+        flag = false
+        //pg_byte, _ := json.Marshal(pg_value)
+        //sub_page :=  fmt.Sprintf("%s",pg_byte)
+     //   _, _ = strconv.Unquote(sub_page)
+       //fmt.Println("CHECKIFPAGECONTAINSDOC | error: ",err)
+        fmt.Println("CHECKIFPAGECONTAINSDOC | MAP | looking in the subpage: ", pg_value , " for ", doc )
+        if !CheckIfPageContainsDoc(pg_value.(map[string]interface{}), doc) {
+          flag = false
+        } else {
+          flag = true
+          break OuterLoop
+        }
+
+      } else if reflect.TypeOf(pg_value).Kind() == reflect.Slice {
+        flag = false
+       // _, _ = strconv.Unquote(sub_page)
+       for _, sub_pg_value := range pg_value.([]interface{}) {
+       //  sub_pg_byte, _ := json.Marshal(sub_pg_value)
+         //sub_page :=  fmt.Sprintf("%s",sub_pg_byte)
+         fmt.Println("CHECKIFPAGECONTAINSDOC | SLICE | looking in the subpage: ", sub_pg_value , " for: ", doc )
+         if reflect.TypeOf(sub_pg_value).Kind() == reflect.Map {
+           if !CheckIfPageContainsDoc(sub_pg_value.(map[string]interface{}), doc) {
+             flag = false
+           } else {
+             flag = true
+             break OuterLoop
+           }
+         } else if reflect.TypeOf(sub_pg_value).Kind() == reflect.Slice {
+           fmt.Println("CHECKIFPAGECONTAINSFDOC | SLICE | checking if doc is in sub page array: ", sub_pg_value)
+           if !CheckIfArrContainsDoc(sub_pg_value.([]interface{}), doc) {
+             flag = false
+           } else {
+             flag = true
+             break OuterLoop
+           }
+         }
+       }
+      }
+    }
   }
   return
 }
@@ -379,7 +383,7 @@ func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
         break
       }
      } else if reflect.TypeOf(pg[doc_key]).Kind() == reflect.Slice {
-         if !ArrHasSameValues(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
+         if !IsSubArr(pg[doc_key].([]interface{}), doc_value.([]interface{})) {
            flag = false
            break
          }
@@ -409,7 +413,7 @@ func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
        break
      }
     } else if reflect.TypeOf(doc[pg_key]).Kind() == reflect.Slice {
-        if !ArrHasSameValues(doc[pg_key].([]interface{}), pg_value.([]interface{})) {
+        if !IsSubArr(doc[pg_key].([]interface{}), pg_value.([]interface{})) {
           flag = false
           break
         }
@@ -426,13 +430,13 @@ func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
 }
 
 /*
-checks if the two arrays have the same values
+IsSubArr: checks if the pg array contain the elements in the doc array
 if I want to compute arrays with the same values and the same count for each element I can use a map to map the elements to the count and then
 check if the two maps are equivalent
 */
-func ArrHasSameValues(pg, doc []interface{}) (flag bool) {
+func IsSubArr(pg, doc []interface{}) (flag bool) {
   defer  func() { if p := recover(); p != nil {
-        fmt.Errorf("ArrHasSameValues paniced!!")
+        fmt.Errorf("IsSubArr paniced!!")
         flag = false
         return
     }
@@ -465,7 +469,7 @@ func Contains(s []interface{}, e interface{}) bool {
         }
       case reflect.Slice:
         if reflect.TypeOf(a).Kind() == reflect.Slice {
-          if ArrHasSameValues(a.([]interface{}), e.([]interface{})) {
+          if IsSubArr(a.([]interface{}), e.([]interface{})) {
             return true
           }
         }
