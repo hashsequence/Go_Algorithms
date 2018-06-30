@@ -24,4 +24,6 @@ get {"layer3" : ["asura", "buddha"]}
 get {"layer3" : ["asura"]}
 get {"layer3" : ["buddha"]}
 get {"layer3" : [",asural"]}
+delete {"layer3" : ["buddhar"]}
 delete {"layer3" : ["buddha"]}
+delete {{"layer3" : ["buddha"]}}

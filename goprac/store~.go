@@ -106,25 +106,35 @@ func (s *Store) Add(document string) {
 }
 
 func (s *Store) Delete(document string) {
+  defer  func() { if p := recover(); p != nil {
+        fmt.Errorf("Delete paniced!!")
+        return
+    }
+  }()
     fmt.Println("\n-------------------------------------------")
     fmt.Println("DELETE | Document: ", document, "\n")
 
     var jsonObject2 interface{}
     json.Unmarshal([]byte(document), &jsonObject2)
     doc := jsonObject2.(map[string]interface{})
-
+    new_storage := s.storage
   for _, page := range s.storage {
 
     var jsonObject interface{}
     json.Unmarshal([]byte(page), &jsonObject)
     pg := jsonObject.(map[string]interface{})
-
+    fmt.Println("EXTRA: ", doc)
     if CheckIfPageContainsDoc(pg, doc) {
       fmt.Println("DELETE |  ", document, " matches the page ", page, " so deleting it\n")
+      new_storage = FilterArr(new_storage, func(ele string) bool {
+        return page != ele
+      })
     } else {
         fmt.Println("DELETE |  ", document, "doesnt matches the page ", page, " \n")
     }
   }
+    fmt.Println("NEW STORAGE | ", new_storage)
+    s.storage = new_storage
     fmt.Println("-------------------------------------------")
 }
 
@@ -188,9 +198,18 @@ func Pos(s string, value rune) int {
     return -1
 }
 
+
 /*
-converts bool to string
+filter: filter a slice that meets a certain condition
 */
+func FilterArr(arr []string, condition func(string) bool) (ret []string) {
+    for _, s := range arr {
+        if condition(s) {
+            ret = append(ret, s)
+        }
+    }
+    return
+}
 /*****************************************************************
 CheckIfPageContainsDoc : check if the document is within the page of the storage
 
@@ -215,7 +234,7 @@ func CheckIfPageContainsDoc(pg, doc map[string]interface{}) (flag bool) {
   nil for JSON null
 */
 defer  func() { if p := recover(); p != nil {
-      fmt.Errorf("Get paniced!!")
+      fmt.Errorf("CheckIfPageContainsDoc paniced!!")
       flag = false
       return
   }
@@ -338,7 +357,7 @@ IsSubObj : checks if the document is a sub object of the page
 */
 func IsSubObj (pg, doc map[string]interface{}) (flag bool) {
   defer  func() { if p := recover(); p != nil {
-        fmt.Errorf("Get paniced!!")
+        fmt.Errorf("IsSubObj paniced!!")
         flag = false
         return
     }
@@ -413,7 +432,7 @@ check if the two maps are equivalent
 */
 func ArrHasSameValues(pg, doc []interface{}) (flag bool) {
   defer  func() { if p := recover(); p != nil {
-        fmt.Errorf("Get paniced!!")
+        fmt.Errorf("ArrHasSameValues paniced!!")
         flag = false
         return
     }
@@ -431,7 +450,7 @@ func ArrHasSameValues(pg, doc []interface{}) (flag bool) {
 
 func Contains(s []interface{}, e interface{}) bool {
   defer  func() bool { if p := recover(); p != nil {
-        fmt.Errorf("Get paniced!!")
+        fmt.Errorf("Contains paniced!!")
         return false
     }
     return true
@@ -465,7 +484,7 @@ IsDocInArr : checks for the doc in the array
 
 func CheckIfArrContainsDoc(pg []interface{}, doc map[string]interface{}) (flag bool) {
   defer  func() bool { if p := recover(); p != nil {
-        fmt.Errorf("Get paniced!!")
+        fmt.Errorf("CheckIfArrContainsDoc paniced!!")
           return false
       }
       return flag
