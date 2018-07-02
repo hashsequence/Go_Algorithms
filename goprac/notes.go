@@ -2019,7 +2019,425 @@ default: // ...
 
 %7.14 example: token-based xml Decoding
 read from book
+
+%8 goroutines and channel
+++++++++++++++++++++++++++++++++++++++++++++++
+%8.1 goroutines
+
+each concurrently executing activity is called a goroutinge
+goroutines are like threads except the difference is quantitive
+
+when a program starts only the main gorouting main() is called
+
+new goroutines are created by the go statements
+
+ex.
+
+f() // call f(); wait for it to return
+go f() // create a new goroutine that calls f(); don't wait
+
+when the main function returns all goroutines are aruptly terminated
+and the program exits. other than by returning or exiting
+the program, there is no programmatic way for one goroutine to stop another,
+but there are ways for goroutines to request that it stop itself
+
+ex. sample concurrent program:
+
+func main() {
+  go spinner(100 * time.Millisecond)
+  const n = 45
+  fibN := fib(n) // slow
+  fmt.Printf("\rFibonacci(%d) = %d\n", n, fibN)
+
+
+func spinner(delay time.Duration) {
+  for {
+    for _, r := range `-\|/` {
+      fmt.Printf("\r%c", r)
+      time.Sleep(delay)
+    }
+  }
+}
+func fib(x int) int {
+  if x < 2 {
+  return x
+  }
+  return fib(x-1) + fib(x-2)
+}
+
+%8.2 concurrent clock
+%8.3 concurrent echo server
+
+read from book
+
+%8.4 channels
+if goroutines are the activities of a concurrent go program, channels are
+the connections between them. a channel is a communication mechanism that
+lets one goroutine send values to another goroutine. Each channel is a conduit
+for values of a particular type, called the channel's element type. the
+type of a channel whose elements have type int is written chan int
+
+to create a channel we use the built in function make:
+
+ch := make(chan int) // ch has type 'chan int'
+
+as with maps a channel is a reference to the data structure created by make.
+
+two channels of the same type may be compared using ==,
+comparison is true if both are reference to the same channel datastructure
+
+a channel may be compared to nil
+
+a channel has two principle operations, send, and recieve, collectively known
+as communications. t
+he <- seperates a channel and the value operands.
+
+in the receive expression, <- precedes the channel operand.
+
+a receive expression whose results is not used is a valid statement
+
+ch <- x //send statement
+x = <- ch // a receive expression in an assignment statement
+<-ch // a receive statement; result is discarded
+
+closing a channel:
+
+close(ch)
+
+a channel created with a simple call to make is called an unbuffered channel,
+but make accepts an optional send argument, an integer called the channel's capacity.
+if the capacity is non-zero, make creates a buffered channel
+
+ch = make(chan int) // unbuffered channel
+ch = make(chan int, 0) //unbuffered channel
+ch = make(chan int, 3) // buffered channel with capcity 3
+
+%8.4.1 unbuffered channels
+
+a send operation on an unbuffered channel blocks the sending routine unitil another
+goroutine executes a corresponding receive the same channel, at which point
+the value is transmitted and both goroutine may continue. conversly, if the
+recieve operation was attempted first, the receiving goroutine is blocked until
+another goroutine performs a send on the same channel.
+
+communcation over an unbuffered channel causes the sending and receiving goroutines to
+synchronize, thats why unbuffered channels are sometimes called synchonous channels
+
+x is concurrent wit y, we dont mean they are simultaneous, but that
+we cant assume anything about ordering
+
+ex.
+
+func main() {
+  conn, err := net.Dial("tcp", "localhost:8000")
+  if err != nil {
+    log.Fatal(err)
+  }
+  done := make(chan struct{})
+  go func() {
+    io.Copy(os.Stdout, conn) // NOTE: ignoring errors
+    log.Println("done")
+    done <- struct{}{} // signal the main goroutine
+    }()
+    mustCopy(conn, os.Stdin)
+    conn.Close()
+    <-done // wait for background goroutine to finish
+}
+
+%8.4.2 Pipelines
+
+channels can be used to connect goroutines together so that the
+output of one is the input to another. this is called a pipeline
+
+
+example of a three staged Pipeline:
+
+gopl.io/ch8/pipeline1
+func main() {
+  naturals := make(chan int)
+  squares := make(chan int)
+  // Counter
+  go func() {
+    for x := 0; ; x++ {
+    naturals <- x
+    }
+  }()
+  // Squarer
+  go func() {
+    for {
+      x := <-naturals
+      squares <- x * x
+    }
+  }()
+  // Printer (in main goroutine)
+  for {
+    fmt.Println(<-squares)
+  }
+}
+
+as you can see it goes infinitely:
+if  i do this:
+
+close(natural)
+
+after the closed channel has been drained, that is, after the
+last sent element has been received, all subsequent receive operations will
+proceed without blocking but will yield a zero value, however
+the squarer loop will spin forever, forever sending zeroes to print
+
+you cannot test whether a channel has been closed, buy you can
+use a boolean:
+
+// Squarer
+go func() {
+  for {
+    x, ok := <-naturals
+    if !ok {
+      break // channel was closed and drained
+    }
+    squares <- x * x
+  }
+  close(squares)
+}()
+
+we can range loop to iterate over channels:
+
+func main() {
+  naturals := make(chan int)
+  squares := make(chan int)
+  // Counter
+  go func() {
+    for x := 0; x < 100; x++ {
+      naturals <- x
+    }
+    close(naturals)
+}()
+  // Squarer
+  go func() {
+    for x := range naturals {
+    squares <- x * x
+  }
+  close(squares)
+}()
+  // Printer (in main goroutine)
+  for x := range squares {
+    fmt.Println(x)
+  }
+}
+
+you dont need to close every channel, a garbage collector will
+reclaim the resources if it is unreachable
+
+closing a nil channel or already closed channel causes a panic
+
+%8.4.2 unidirectional channel types
+
+we can make channels only one directional;
+
+chan<- int. a send only channel of int
+<- chan int, a receive-only channel of int,
+
+ex modifying previous example:
+
+func counter(out chan<- int) {
+  for x := 0; x < 100; x++ {
+    out <- x
+  }
+  close(out)
+  }
+  func squarer(out chan<- int, in <-chan int) {
+    for v := range in {
+      out <- v * v
+    }
+    close(out)
+  }
+  func printer(in <-chan int) {
+    for v := range in {
+      fmt.Println(v)
+    }
+  }
+func main() {
+  naturals := make(chan int)
+  squares := make(chan int)
+  go counter(naturals)
+  go squarer(squares, naturals)
+  printer(squares)
+}
+
+%8.4.4 buffered channels
+
+a buffered channel has a queue of elements. the queue's max size
+is determined when it is created, by make
+
+ex.
+ch = make(chan string, 3)
+
+a send operation on a buffered channel inserts an element at the back
+of the queue, and a receive oepration removes an element from the front.
+if the channel is full, the send operation blocks until space is made
+available by another goroutine's receive. conversley, if the channel
+is empty, a receive operation blocks until a value is sent by another
+goroutine
+
+take a look at this:
+
+func mirroredQuery() string {
+  responses := make(chan string, 3)
+  go func() { responses <- request("asia.gopl.io") }()
+  go func() { responses <- request("europe.gopl.io") }()
+  go func() { responses <- request("americas.gopl.io") }()
+  return <-responses // return the quickest response
+}
+  func request(hostname string) (response string) { // ... // }
+
+
+if we used unbuffered channels, then the two slower goroutines would
+have gotten stuck trying to send their responses on a channel from
+which no goroutine will ever recieved. this situation is called
+a goroutine leak
+
+pros of unbuffered channels is that every send is synchronized with a
+receive
+
+with buffered channels, send and receive are decoupled
+
+failure to allocated enough capcity to buffered channels can cause deadlock
+
+
+%8.5 looping in parallel
+
+there is no direct way to wait until a goroutine has finished, but
+we can change the inner goroutine to report its completion to the
+outer goroutine by sending an event on a shared channel.
+
+// makeThumbnails3 makes thumbnails of the specified files in parallel.
+func makeThumbnails3(filenames []string) {
+  ch := make(chan struct{})
+  for _, f := range filenames {
+    go func(f string) {
+      thumbnail.ImageFile(f) // NOTE: ignoring errors
+      ch <- struct{}{}
+      }(f)
+}
+
+  // Wait for goroutines to complete.
+  for range filenames {
+    <-ch
+  }
+}
+
+we have to pass f into a inner function since as we iterate,
+the value of f changes so the goroutine will be reading from
+the same f, whic will be bad
+
+for _, f := range filenames {
+  go func() {
+    thumbnail.ImageFile(f) // NOTE: incorrect!
+    // ...
+    }()
+}
+
+what if we want to return values from each worker goroutine to the main
+one?:
+
+// makeThumbnails4 makes thumbnails for the specified files in parallel.
+// It returns an error if any step failed.
+func makeThumbnails4(filenames []string) error {
+  errors := make(chan error)
+  for _, f := range filenames {
+  go func(f string) {
+  _, err := thumbnail.ImageFile(f)
+    errors <- err
+    }(f)
+  }
+  for range filenames {
+    if err := <-errors; err != nil {
+      return err // NOTE: incorrect: goroutine leak!
+    }
+  }
+  return nil
+}
+
+bug: when we first get our first non-nil errors, then
+the other goroutine will have no channel to report to,
+and cause a goroutine leak.
+
+so we can fix this using a buffered channel with enough capacity
+
+// makeThumbnails5 makes thumbnails for the specified files in parallel.
+// It returns the generated file names in an arbitrary order,
+// or an error if any step failed.
+func makeThumbnails5(filenames []string) (thumbfiles []string, err error) {
+  type item struct {
+    thumbfile string
+    err error
+  }
+  ch := make(chan item, len(filenames))
+  for _, f := range filenames {
+    go func(f string) {
+    var it item
+    it.thumbfile, it.err = thumbnail.ImageFile(f)
+    ch <- it
+    }(f)
+}
+for range filenames {
+  it := <-ch
+    if it.err != nil {
+      return nil, it.err
+    }
+  thumbfiles = append(thumbfiles, it.thumbfile)
+  }
+  return thumbfiles, nil
+}
+
+to know when the last goroutine has finished we ned a special
+counter to increment before each goroutine starts and decrement
+when one finishes using:
+
+sync,waitGroup
+
+here is code using it:
+
+// makeThumbnails6 makes thumbnails for each file received from the channel.
+// It returns the number of bytes occupied by the files it creates.
+func makeThumbnails6(filenames <-chan string) int64 {
+  sizes := make(chan int64)
+  var wg sync.WaitGroup // number of working goroutines
+  for f := range filenames {
+    wg.Add(1)
+    // worker
+    go func(f string) {
+      defer wg.Done()
+      thumb, err := thumbnail.ImageFile(f)
+      if err != nil {
+        log.Println(err)
+        return
+      }
+      info, _ := os.Stat(thumb) // OK to ignore error
+      sizes <- info.Size()
+    }(f)
+  }
+  // closer
+  go func() {
+    wg.Wait()
+    close(sizes)
+  }()
+  var total int64
+  for size := range sizes {
+    total += size
+  }
+  return total
+}
+
+notice the pattern:
+
+call add before running goroutine and
+deferring the decrement wg.done()
+
+
 */
+
+
 
 package main
 
