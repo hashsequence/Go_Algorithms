@@ -2,12 +2,6 @@ package main
 
 import "fmt"
 
-type Vertex struct {
-	Lat, Long float64
-}
-
-var m map[string]Vertex
-
 func main() {
 
 	val := []int{60, 100, 120}
