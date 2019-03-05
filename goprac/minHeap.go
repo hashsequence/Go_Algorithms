@@ -103,7 +103,6 @@ func (minH *MinHeap) decreaseKey(i int, new_val int) {
 	(*minH.harr)[i] = new_val
 	for ; i != 0 && (*minH.harr)[minH.parent(i)] > (*minH.harr)[i]; i = minH.parent(i) {
 		swap(&(*minH.harr)[i], &(*minH.harr)[minH.parent(i)])
-		i = minH.parent(i)
 	}
 }
 
@@ -149,9 +148,9 @@ func (minH *MinHeap) minHeapify(i int) {
 
 func swap(a *int, b *int) bool {
 	if reflect.TypeOf(a) == reflect.TypeOf(b) {
-		t := a
+		t := *a
 		*a = *b
-		*b = *t
+		*b = t
 		return true
 	}
 	return false
