@@ -14,11 +14,8 @@ func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
     carry := 0
     val := 0
     for ptr1 != nil || ptr2 != nil {
-        val = ifNull(ptr1)+ifNull(ptr2)
-        if val < 10 {
-            val = val + carry
-            carry = 0
-        }
+        val = ifNull(ptr1)+ifNull(ptr2) + carry
+        carry = 0
         if val > 10 {
             val = val % 10 + carry
             carry = 1
@@ -52,11 +49,11 @@ func ifNull(i *ListNode) int {
     return i.Val
 }
 
-func incrementPtr(e ...**ListNode) {
-    for i, _ := range e {
-        if *e[i] != nil {
-            *e[i] = (*e[i]).Next
-        }
-       
+func incrementPtr(ptr1, ptr2 **ListNode) {
+    if *ptr1 != nil {
+        *ptr1 = (*ptr1).Next
+    }
+    if *ptr2 != nil {
+        *ptr2 = (*ptr2).Next
     }
 }
