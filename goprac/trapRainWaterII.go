@@ -23,17 +23,31 @@ func trapRainWater(heightMap [][]int) int {
         visited[len(heightMap)-1][i] = true
     }
     
-    for i := 0; i < < len(heightMap); i++ {
-        h.insertKey(i, 0, heightMap[i][0])
-        h.insertKey(i, len(heightMap[0])-1, heightMap[i][len(heightMap[0]-1)])
-        visited[i][0]
-        visited[i][len(heightMap[0]-1)]
+    for i := 0; i < len(heightMap); i++ {
+        h.insertKey(Cell{i, 0, heightMap[i][0]})
+        h.insertKey(Cell{i, len(heightMap[0])-1, heightMap[i][len(heightMap[0])-1]})
+        visited[i][0] = true
+        visited[i][len(heightMap[0])-1] = true
     }
-    dir := [4]int{Dir{0,1}, Dir{1,0}, Dir{0,-1}, Dir{-1,0}}
-    for len(h.arr) > 0 {
-        currCell = h.extractMin()
+    //fmt.Println(visited)
+    dir := [4]Dir{Dir{0,1}, Dir{1,0}, Dir{0,-1}, Dir{-1,0}}
+    maxHeight := 0
+    for h.size > 0 {
+        curr := h.extractMin()
+        maxHeight = max(maxHeight, curr.height)
         for i, _ := range dir {
-            
+            x := dir[i].x + curr.x 
+            y := dir[i].y + curr.y
+            //fmt.Println(x, " ", y, " ", visited)   
+            if x < 0 || y < 0 || x >= len(heightMap) || y >= len(heightMap[0]) || visited[x][y]  {
+                continue          
+            } 
+            //fmt.Println(x, " ", y)   
+             visited[x][y] = true
+            if heightMap[x][y] < maxHeight {
+                water += maxHeight - heightMap[x][y]
+            }
+            h.insertKey(Cell{x, y, heightMap[x][y]})                                                 
         }
         
     }
@@ -65,7 +79,7 @@ type MinHeap struct {
 	size int
 }
 
-func NewMinHeap(cap int) MinHeap {
+func newMinHeap(cap int) MinHeap {
 	minH := MinHeap{nil, cap, 0}
 	tempArr := make([]Cell, cap)
 	minH.arr = &tempArr
