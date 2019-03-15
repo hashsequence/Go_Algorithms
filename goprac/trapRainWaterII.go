@@ -8,16 +8,42 @@ func trapRainWater(heightMap [][]int) int {
         }
     }
     water := 0
+    //we want to use a minHeap 
+    visited := make([][]bool,len(heightMap))
+    h := newMinHeap(len(heightMap) * len(heightMap[0]))
+    
+    for i, _ := range visited {
+        visited[i] = make([]bool, len(heightMap[i]))
+    }
+    
+    for i := 0; i < len(heightMap[0]); i++ {
+        h.insertKey(Cell{0, i, heightMap[0][i]})
+        h.insertKey(Cell{len(heightMap)-1, i, heightMap[len(heightMap)-1][i]})
+        visited[0][i] = true
+        visited[len(heightMap)-1][i] = true
+    }
+    
+    for i := 0; i < < len(heightMap); i++ {
+        h.insertKey(i, 0, heightMap[i][0])
+        h.insertKey(i, len(heightMap[0])-1, heightMap[i][len(heightMap[0]-1)])
+        visited[i][0]
+        visited[i][len(heightMap[0]-1)]
+    }
+    dir := [4]int{Dir{0,1}, Dir{1,0}, Dir{0,-1}, Dir{-1,0}}
+    for len(h.arr) > 0 {
+        currCell = h.extractMin()
+        for i, _ := range dir {
+            
+        }
+        
+    }
     
     return water
 }
-
-const MaxUint = ^uint(0)
-const MinUint = 0
-
-const MaxInt = int(^uint(0) >> 1)
-const MinInt = -MaxInt - 1
-
+type Dir struct {
+    x int
+    y int
+}
 type Cell struct {
     x int
     y int
@@ -122,4 +148,12 @@ func (this *MinHeap) extractMin() Cell {
 	this.size--
 	this.minHeapify(0)
 	return root
+}
+
+func max(a int, b int) int {
+	c := b
+	if a > b {
+		c = a
+	}
+	return c
 }
