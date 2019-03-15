@@ -30,6 +30,7 @@ func trapRainWater(heightMap [][]int) int {
         visited[i][len(heightMap[0])-1] = true
     }
     //fmt.Println(visited)
+	//bread first search and we traversed the lowest heights first 
     dir := [4]Dir{Dir{0,1}, Dir{1,0}, Dir{0,-1}, Dir{-1,0}}
     maxHeight := 0
     for h.size > 0 {
