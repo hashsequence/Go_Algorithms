@@ -1,6 +1,6 @@
 func minWindow(s string, t string) string {
     
-   
+   //yes you can index string, but it will give you the ascii number
     //initialize count map for t 
     hash_t := [128]int{}
      for _, val := range t {
