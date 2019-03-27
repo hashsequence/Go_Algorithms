@@ -5,6 +5,21 @@
  *     Next *ListNode
  * }
  */
+/*
+the hard part was the many edge cases and knowing what to keep track of
+we need a iterator pointer for the list that was less than x
+we need a iterator pointer for the list that was greater or equal to x
+we need a pointer to the head to the list that was greater or equal to the x so we can merge the two lists in the end
+we also need to keep a pointer to the new head of the list
+
+first thing is to decide what the new head was:
+the new head will always be the head of the first node that is less than x,
+but if we havent encountered a node less than x then we pick the first node that is greater than x
+
+we then iterate over our original list with the above invariance
+
+
+*/
 func partition(head *ListNode, x int) *ListNode {
     if head == nil {
         return head
