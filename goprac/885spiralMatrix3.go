@@ -27,15 +27,26 @@ traversePerimeter(R int, C int, r0 int, c0 int, n int, res *[][]int, i *int) {
     if n == 0 {
         res[*i][0] = r0
         res[*i][1] = c0
+        i++
         return
     } 
     //traverse right edge if possible
-
+    if c0 + n < C {
+    
+    } 
     //traverse down edge if possible
-    
-    //travers left edge if possible
-    
+    if r0 + n < R {
+       
+    } 
+    //traverse left edge if possible
+    if c0 - n >= 0 {
+        
+    } 
     //traverse up edge if possible
+    if r0 - n >= 0 {
+        
+    } 
+    return 
 }
 
 func min(a int, b int) int {
