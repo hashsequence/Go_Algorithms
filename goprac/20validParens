@@ -1,0 +1,43 @@
+func isValid(s string) bool {
+    stack := []rune{}
+    stack_size := 0
+    for _, val := range s {
+        if val == '{' || val == '(' || val == '[' {
+            stack = append(stack,val)
+            stack_size++
+        } else if stack_size > 0 && val == '}' && stack[stack_size-1] == '{' {
+            stack_size--
+            if stack_size > 1 {
+                stack = stack[0:stack_size]
+            } else if stack_size == 1 {
+                stack = []rune{stack[0]}
+            } else {
+                stack = []rune{}
+            }
+        } else if stack_size > 0 && val == ')' && stack[stack_size-1] == '(' {
+            stack_size--
+            if stack_size > 1 {
+                stack = stack[0:stack_size]
+            } else if stack_size == 1 {
+                stack = []rune{stack[0]}
+            } else {
+                stack = []rune{}
+            }
+        } else if stack_size > 0 && val == ']' && stack[stack_size-1] == '[' {
+            stack_size--
+             if stack_size > 1 {
+                stack = stack[0:stack_size]
+            } else if stack_size == 1 {
+                stack = []rune{stack[0]}
+            } else {
+                stack = []rune{}
+            }
+        } else if stack_size == 0 && val == '}'|| val == ')' ||  val == ']' {
+            return false
+        }
+    } 
+    if stack_size != 0 {
+        return false
+    }
+    return true
+}
