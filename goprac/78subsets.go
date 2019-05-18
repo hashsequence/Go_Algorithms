@@ -1,4 +1,4 @@
-func funcsubsetsBetterSolution(nums []int) [][]int {
+func subsetsBetterSolution(nums []int) [][]int {
         sets := [][]int{[]int{}}
         for _, n := range nums {
                 for _, set := range sets {
