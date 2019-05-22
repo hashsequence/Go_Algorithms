@@ -1,25 +1,26 @@
 //func Slice(slice interface{}, less func(i, j int) bool)
 
 func threeSum(nums []int) [][]int {
+    
     return sortThreeSum(nums)
 }
 
 func HashThreeSum(nums []int) [][]int {
-    set := map[int]bool{}
-    
-    for _,val := range nums {
-        set[val] = true
-    } 
-    
+    set := map[int]int{}
+    resSet := map[string][]int{}
     res := [][]int{}
-    for i,_ := range nums {
-        for j,_ := range nums {
-            if j > i {
-                if set[-1*(nums[i] + nums[j])] == true {
-                    res = append(res, []int{nums[i],nums[j],-1*(nums[i] + nums[j])})
-                }
+    for i := 0; i < len(nums)-1; i++ {
+        for j := i+1; j < len(nums); j++ {
+            if index ,ok := set[-1*(nums[i] + nums[j])]; ok == true && index != i && index != j{
+                arr := []int{nums[i],nums[j],-1*(nums[i] + nums[j])}
+                resSet[hash(arr)] = arr
+            } else {
+                set[nums[j]] = j
             }
         }
+    }
+    for _,val := range resSet {
+        res = append(res,val)
     }
     return res
     
@@ -55,5 +56,14 @@ func sortThreeSum(nums []int) [][]int {
         
     }
     return res
+}
+
+func hash(arr []int) string {
+    sort.Slice(arr, func(i,j int) bool {return arr[i] < arr[j]})
+    var s string
+    for i,_ := range arr {
+        s += strconv.Itoa(arr[i]) + ":"
+    }
+    return s[:len(s)-1]
 }
 
