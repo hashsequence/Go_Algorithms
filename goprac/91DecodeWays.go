@@ -6,7 +6,7 @@ func numDecodings(s string) int {
         if i >= 2 {
             prevPrev = prev
             prev = count
-            if (s[i-1] != '2' && s[i-1] != '1' && s[i] == '0') || (s[i-1] == '0' &&  s[i] == '0') {
+            if s[i-1] != '2' && s[i-1] != '1' && s[i] == '0' {
                 fmt.Println("edge case")
                 return 0
             } 
@@ -22,7 +22,7 @@ func numDecodings(s string) int {
             } 
         } else if i == 1 {
             prev = count
-            if (s[i-1] != '2' && s[i-1] != '1' && s[i] == '0') || (s[i-1] == '0' &&  s[i] == '0') {
+            if s[i-1] != '2' && s[i-1] != '1' && s[i] == '0' {
                 fmt.Println("edge case")
                 return 0
             } 
