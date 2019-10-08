@@ -1,4 +1,4 @@
-// LIFO and FIFO in Golang
+//FIFO in Golang
 package main
   
 import (
