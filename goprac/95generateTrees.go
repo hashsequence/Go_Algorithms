@@ -32,25 +32,21 @@ func generateTrees(n int) []*TreeNode {
     if n <= 0 {
         return []*TreeNode{}
     }
-    set := make([]int,n)
-    for i := 1 ; i < n+1; i++ {
-        set[i-1] = i
-    }
-    return generateTreesFromSet(set)
+    return generateTreesFromSet(1,n+1)
 }
 
-func generateTreesFromSet(set []int) []*TreeNode {
-    if len(set) == 0 {
+func generateTreesFromSet(start, end int) []*TreeNode {
+    if  end-start == 0 {
         return []*TreeNode{nil}
     }
-    if len(set) == 1 {
-        return []*TreeNode{&TreeNode{set[0],nil,nil}}
+    if end-start == 1 {
+        return []*TreeNode{&TreeNode{start,nil,nil}}
     }
     arrOfTrees := []*TreeNode{}
-    for i := 0; i < len(set); i++ {
-        leftTrees := generateTreesFromSet(set[0:i])
-        rightTrees := generateTreesFromSet(set[i+1:])
-        root := set[i]
+    for i := start; i < end; i++ {
+        leftTrees := generateTreesFromSet(start,i)
+        rightTrees := generateTreesFromSet(i+1,end)
+        root := i
         for k,_ := range leftTrees {
             for l,_ := range rightTrees{
                 arrOfTrees = append(arrOfTrees, &TreeNode{root,leftTrees[k],rightTrees[l]})
