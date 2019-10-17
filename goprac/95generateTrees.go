@@ -18,8 +18,8 @@ so for root i , all the lefttree nodes is with bsts with roots in [0,...,i-1] an
 
 so let basically G(i,n) := [unique bst with root i with with roots in [0,...,i-1] and righttree nodes with roots in [i+1,...,n]]
 
-lets make a function called generateTreesFromSet that takes in a set of unqiue values and return a set of unique bst with those values
-so visually
+lets make a function called generateTreesFromSet (gt in diagram) that takes in a set of unqiue values and return a set of unique bst with those values
+so visually, and gt will be recursive to recursive generate subbranches
 
               i
               *
