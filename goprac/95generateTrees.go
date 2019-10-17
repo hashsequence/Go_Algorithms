@@ -12,6 +12,7 @@
 the idea is that you can divide into further subproblems
 let F(n) := be the set of all unique bst
 let G(i,n) := be the set of all unique bst with root node i out on n nodes
+F(n) = sum of G(i,n) from i = 0 to n
 
 so for root i , all the lefttree nodes is with bsts with roots in [0,...,i-1] and righttree nodes with roots in [i+1,...,n]
 
