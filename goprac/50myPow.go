@@ -10,6 +10,27 @@ func myPow(x float64, n int) float64 {
     return acc
 }
 
+func abs(n int) int{
+    if n < 0 {
+        return n * -1
+    } 
+    return n
+}
+
+func multiply(x float64, n int) float64 {
+    if n == 1 {
+        return x
+    }
+    v := multiply(x,n/2) 
+    if n % 2 == 0 {
+        v *=v
+    } else {
+        v = v * v * x
+    }
+    return v
+}
+/********************************************************************************/
+
 func myPowV2(base float64, n int) float64 {
     if n == 0 {
         return 1
@@ -30,24 +51,4 @@ func myPowV2(base float64, n int) float64 {
             return n/2 + 1   
         }
     }()) * myPowV2(base,n/2)
-}
-
-func abs(n int) int{
-    if n < 0 {
-        return n * -1
-    } 
-    return n
-}
-
-func multiply(x float64, n int) float64 {
-    if n == 1 {
-        return x
-    }
-    v := multiply(x,n/2) 
-    if n % 2 == 0 {
-        v *=v
-    } else {
-        v = v * v * x
-    }
-    return v
 }
