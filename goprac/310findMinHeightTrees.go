@@ -23,24 +23,24 @@ func findMinHeightTrees(n int, edges [][]int) []int {
         edgeSet.insertDirectedEdge(edges[i][1], edges[i][0])
     }
    // fmt.Println("edgeSet",edgeSet)
-    leafNodes := []int{}
+    leafNodes := []int{} //get leaf nodes of the tree
     for i := 0; i < n; i++ {
         if len(edgeSet[i]) == 1 || len(edgeSet[i]) == 0 {
             leafNodes = append(leafNodes,i)
         }
     }
     //fmt.Println("leafNodes", leafNodes)
-    for n > 2 {
-        temp := []int{}
+    for n > 2 {//terminates when we have only two non leaf nodes left
+        temp := []int{} //will hold the new leaf nodes
         n-= len(leafNodes)
-        for _,v1 := range leafNodes {
-            v2 := edgeSet.popDirectedEdges(v1)
+        for _,v1 := range leafNodes { //iterate through current leaf nodes
+            v2 := edgeSet.popDirectedEdges(v1) //remove edge v1<---v2 from graph, and return the vertex that is still in the tree
            // fmt.Println(v2, len(edgeSet[v2]) )
-            if len(edgeSet[v2]) == 1 {
-                temp = append(temp,v2)
+            if len(edgeSet[v2]) == 1 {  //if the vertex v2 you got is only connected to one other v1 then its a leaf 
+                temp = append(temp,v2) //we add this new leafnode to our new set
             }
         }
-        leafNodes = temp
+        leafNodes = temp //set the new list of leaf nodes
     }
     return leafNodes
   
