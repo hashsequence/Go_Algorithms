@@ -14,7 +14,7 @@ func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
     } else if l1 == nil && l2 != nil {
         return l2
     }
-    //initialization 
+    //initialization head and curr
     ptr1 := l1
     ptr2 := l2
     var head *ListNode
