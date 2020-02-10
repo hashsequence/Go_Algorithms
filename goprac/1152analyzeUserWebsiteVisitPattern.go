@@ -75,9 +75,7 @@ func mostVisitedPattern(username []string, timestamp []int, website []string) []
     
     //sorting triples
     QSort(&triplesArr, 0, triplesArr.Len()-1)
-    //fmt.Println(triplesArr)
-  
-    
+ 
     //getting all the unique triple sequences for each user
     currUser := triplesArr[0].username
     prevUser := triplesArr[0].username
@@ -85,28 +83,33 @@ func mostVisitedPattern(username []string, timestamp []int, website []string) []
     for i,_ := range triplesArr { 
         currUser = triplesArr[i].username
         if currUser != prevUser {
-            //fmt.Println(prevUser, start, i)
             GetThreeSequences(triplesArr, seqMap, start, i)
             start = i
         }
          prevUser = triplesArr[i].username
     }
     
+    
+    
     //get sequences for final user
-    //fmt.Println(prevUser, start, len(triplesArr))
-    
-    //sort the triple sequence
     GetThreeSequences(triplesArr, seqMap, start, len(triplesArr))
-    tripleSeqs := make(TripleSeqs, 0)
-    for i,_ := range seqMap {
-        tripleSeqs = append(tripleSeqs, seqMap[i])
-    }
-    QSort(&tripleSeqs, 0, tripleSeqs.Len()-1)
-    //for i := len(tripleSeqs)-1; i >= 0; i-- {
-    //    fmt.Println(tripleSeqs[i].key,tripleSeqs[i].count)
-    //}
+    //tripleSeqs := make(TripleSeqs, 0)
     
-    return tripleSeqs[len(tripleSeqs)-1].seq
+    //get the most frequent one
+    var mostCommon *TripleSeq
+    for i,_ := range seqMap {
+        if mostCommon == nil {
+            mostCommon = seqMap[i]
+        } else {
+            curr := TripleSeqs{mostCommon, seqMap[i]}
+            if curr.Less(0,1) {
+                mostCommon = seqMap[i]
+            }
+        }
+    
+    }
+    
+    return mostCommon.seq
     
       
 }
@@ -196,10 +199,7 @@ func QSort(triples Sortable, left, right int) {
     oLeft := left
     rand.Seed(time.Now().UnixNano())
     mid := rand.Intn(right-left+1) + left
-    //fmt.Println("current", triples)
-    //fmt.Println(left, right, mid)
     triples.Swap(right, mid)
-    //fmt.Println("after swap " ,triples)
     for i := left; i <= right; i++ {
         if triples.Less(i, right) {
             triples.Swap(i , left)
@@ -208,7 +208,6 @@ func QSort(triples Sortable, left, right int) {
     }
     
     triples.Swap(left, right)
-    //fmt.Println("final ",triples)
     mid = left
     QSort(triples, oLeft, mid-1)
     QSort(triples, mid+1, right)
