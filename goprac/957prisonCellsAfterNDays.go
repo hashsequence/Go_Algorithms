@@ -63,17 +63,19 @@ func prisonAfterNDays(cells []int, N int) []int {
         return cells
     }
     cycleDetected := false
-    set := map[[8]rune]int{}
+    set := map[[8]rune]bool{}
     dayToCells := map[int][]int{}
     k := 0
     for  ;k <= N; k++ {
         //fmt.Println(k, cells)
+        //dont store day 0 in cache since day 0 will not repeat
         if _, ok := set[hash(cells)]; !ok && k != 0{
-            set[hash(cells)] = k-1
+            set[hash(cells)] = true
             dayToCells[k] = cells
         } else {
             if k != 0 {
                 cycleDetected = true
+                //decrement k since this day k is a repeat
                 k--
                 break
             }
@@ -90,9 +92,11 @@ func prisonAfterNDays(cells []int, N int) []int {
         cells = nextCells
     }
     //fmt.Println(N, k, dayToCells)
+    //if no cycle detected simply return the Nth day
     if !cycleDetected {
         return dayToCells[N]
     }
+    //set day 0 in the array to be equal to the last unique sequence before repeating because (N-k)%k < k so let kth day be 0 in cache
     dayToCells[0] = dayToCells[k]
     return dayToCells[(N-k) % k]
 }
