@@ -158,16 +158,12 @@ func Translate3Set(dict map[int]string, digit int, prevDigit int,  nextDigit int
         place /= 1000000000
     }
     if place == 1 {
-        if prevDigit == 0 {
-            return dict[digit]
-        } else if prevDigit != 0 && prevDigit != 1 {
+        if prevDigit != 1 {
             return dict[digit]
         }
     } else if place == 10 {
         if digit == 1 {
             return dict[nextDigit+10]
-        } else if digit == 1 && nextDigit == 0 {
-            return dict[place]
         } else if digit > 1 {
             return dict[digit*10]
         }
