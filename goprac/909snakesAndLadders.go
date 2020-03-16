@@ -44,17 +44,16 @@ The board square with number N*N has no snake or ladder.
 solution:
 simple bfs
 hard part is translating x position to r and c
-use visited array 
+use visited array or mark board[i][j] = -2 for visited
 make a queue
 */
 
 func snakesAndLadders(board [][]int) int {
     boardHeight := len(board)
     boardWidth := len(board[0])
-    visited := make([]bool, boardHeight * boardWidth + 1)
     q := make(Queue, 0)
     q.Push(&Item{1, 0})
-    visited[1] = true
+    board[boardHeight-1][0] = -2
     for !q.IsEmpty() {
         x := q.Front()
         q.Pop()
@@ -67,9 +66,9 @@ func snakesAndLadders(board [][]int) int {
             if board[nextR][nextC] > 0 {
                 nextVal = board[nextR][nextC]
             }
-            if !visited[nextVal] {
+            if board[nextR][nextC] != -2 {
                 q.Push(&Item{nextVal, x.depth+1})   
-                visited[nextVal] = true
+                board[nextR][nextC] = -2
             }      
         } 
     }
